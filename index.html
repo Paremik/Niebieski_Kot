@@ -3,10 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Niebieski Kot</title>
+    <!-- SEO & Meta -->
+    <title>Niebieski Kot | Kocia Kawiarnia Premium</title>
+    <meta name="description" content="Ekskluzywna kocia kawiarnia. Odpocznij przy świetnej kawie w towarzystwie naszych mruczących rezydentów." />
+    <!-- Безопасные премиум-шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Подключаем скрипт Tailwind безопасно для Vercel -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Конфигурация Tailwind прямо в браузере (до момента настройки полноценного PostCSS)
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Outfit', 'sans-serif'] },
+            colors: {
+              navy: '#0F172A',
+              gold: '#D4AF37',
+              cream: '#FAFAFA'
+            }
+          }
+        }
+      }
+    </script>
   </head>
-  <body>
+  <body class="bg-cream text-navy antialiased selection:bg-gold selection:text-white">
     <div id="root"></div>
     <script type="module" src="/main.jsx"></script>
   </body>
