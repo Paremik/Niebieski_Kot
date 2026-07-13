@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, MapPin, Clock, PawPrint } from 'lucide-react';
 
