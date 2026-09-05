@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowRight, CalendarDays, Cat, Check, Clock3, Coffee, Heart, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, X } from 'lucide-react';
+import { ArrowRight, CalendarDays, Cat, Check, ChevronLeft, ChevronRight, Clock3, Coffee, Heart, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, X } from 'lucide-react';
 
 const cats = [
   { name: 'Luna', note: '4 lata · spokojna obserwatorka', story: 'Trafiła do nas po przeprowadzce opiekunów. Najchętniej siedzi przy oknie i sama wybiera moment na głaskanie.', image: 'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?q=85&w=900&auto=format&fit=crop' },
@@ -13,15 +13,26 @@ const rules = [
   'Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.',
   'Własne jedzenie oraz smakołyki dla kotów zostawiamy poza lokalem.',
 ];
+const menuSlides = [
+  { image: '/images/menu-latte.webp', alt: 'Kocie latte z maślanym ciasteczkiem', label: 'Kocie latte' },
+  { image: '/images/menu-toast.webp', alt: 'Grzanka z kozim serem i pieczonym burakiem', label: 'Grzanka z kozim serem' },
+  { image: '/images/menu-cheesecake.webp', alt: 'Sernik baskijski z owocami i matchą', label: 'Sernik baskijski' },
+];
 
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [menuSlide, setMenuSlide] = useState(0);
   const [messages, setMessages] = useState([{ role: 'assistant', content: 'Cześć! 🐾 Zapytaj mnie o godziny, zasady, menu albo naszych rezydentów.' }]);
   const scrollRef = useRef(null);
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, chatOpen]);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const timer = window.setInterval(() => setMenuSlide((slide) => (slide + 1) % menuSlides.length), 4500);
+    return () => window.clearInterval(timer);
+  }, []);
   const scrollTo = (id) => { setMobileMenu(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); };
   const warsawNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Warsaw' }));
   const day = warsawNow.getDay();
@@ -70,7 +81,7 @@ export default function App() {
 
       <section id="cats" className="mx-auto max-w-6xl px-5 py-24 sm:px-8"><div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">Nasi gospodarze</span><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Poznaj ekipę.</h2></div><p className="max-w-md text-slate-600">Każdy inny. Każdy u siebie. Pixel szuka domu, Luna i Mochi są stałymi gospodarzami.</p></div><div className="grid gap-5 md:grid-cols-3">{cats.map((cat,i) => <article key={cat.name} className={`group overflow-hidden rounded-[2rem] bg-white shadow-sm ${i === 1 ? 'md:translate-y-8' : ''}`}><div className="aspect-[4/5] overflow-hidden"><img src={cat.image} alt={`Kot ${cat.name}`} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105"/></div><div className="p-5"><div className="flex items-center justify-between"><div><h3 className="text-xl font-black">{cat.name}</h3><p className="mt-1 text-sm font-semibold text-sky-600">{cat.note}</p></div><PawPrint className="text-sky-400"/></div><p className="mt-4 text-sm leading-relaxed text-slate-600">{cat.story}</p></div></article>)}</div></section>
 
-      <section id="menu" className="mx-auto max-w-6xl px-5 py-24 sm:px-8"><div className="relative overflow-hidden rounded-[3rem] bg-sky-500 px-7 py-14 text-white sm:px-12"><div className="absolute -right-12 -top-16 text-white/10"><Coffee size={220}/></div><div className="relative max-w-2xl"><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-100">Jedzenie i napoje</span><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Kocia karta ma własne miejsce.</h2><p className="mt-5 max-w-xl leading-relaxed text-sky-50">Kawy specialty, śniadania, lekkie dania i domowe słodkości — teraz w przejrzystym menu z cenami.</p><a href="/?page=menu" className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-extrabold text-sky-600 transition hover:-translate-y-1">Otwórz pełne menu <ArrowRight size={18}/></a></div></div></section>
+      <section id="menu" className="mx-auto max-w-6xl px-5 py-24 sm:px-8"><div className="relative overflow-hidden rounded-[3rem] bg-sky-500 px-7 py-10 text-white sm:px-12 sm:py-12"><div className="absolute -left-12 -top-16 text-white/10"><Coffee size={220}/></div><div className="relative grid items-center gap-10 lg:grid-cols-[1.05fr_.75fr]"><div><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-100">Jedzenie i napoje</span><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Kocia karta ma własne miejsce.</h2><p className="mt-5 max-w-xl leading-relaxed text-sky-50">Kawy specialty, śniadania, lekkie dania i domowe słodkości — teraz w przejrzystym menu z cenami.</p><a href="/?page=menu" className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-extrabold text-sky-600 transition hover:-translate-y-1">Otwórz pełne menu <ArrowRight size={18}/></a></div><div className="mx-auto w-full max-w-sm"><div className="relative aspect-[4/5] overflow-hidden rounded-[2.25rem] bg-sky-300 shadow-2xl ring-1 ring-white/30">{menuSlides.map((slide, index) => <img key={slide.image} src={slide.image} alt={index === menuSlide ? slide.alt : ''} aria-hidden={index !== menuSlide} loading="lazy" className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${index === menuSlide ? 'scale-100 opacity-100' : 'scale-105 opacity-0'}`}/>) }<div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-2xl bg-slate-950/75 p-3 backdrop-blur-md"><button type="button" onClick={() => setMenuSlide((slide) => (slide - 1 + menuSlides.length) % menuSlides.length)} aria-label="Poprzednie zdjęcie" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 transition hover:bg-white/25"><ChevronLeft size={18}/></button><p className="text-center text-sm font-extrabold">{menuSlides[menuSlide].label}</p><button type="button" onClick={() => setMenuSlide((slide) => (slide + 1) % menuSlides.length)} aria-label="Następne zdjęcie" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 transition hover:bg-white/25"><ChevronRight size={18}/></button></div></div><div className="mt-4 flex justify-center gap-2">{menuSlides.map((slide, index) => <button key={slide.image} type="button" onClick={() => setMenuSlide(index)} aria-label={`Pokaż zdjęcie ${index + 1}: ${slide.label}`} aria-current={index === menuSlide} className={`h-2 rounded-full transition-all ${index === menuSlide ? 'w-7 bg-white' : 'w-2 bg-white/45 hover:bg-white/70'}`}/>)}</div></div></div></div></section>
 
       <section id="rules" className="mx-auto grid max-w-6xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-2"><div><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">Koci savoir-vivre</span><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Kilka zasad.<br/>Dużo spokoju.</h2><p className="mt-5 max-w-md leading-relaxed text-slate-600">To dom naszych rezydentów. Proste reguły sprawiają, że wszystkim — na dwóch i czterech łapach — jest tu dobrze.</p></div><ul className="space-y-3">{rules.map((rule) => <li key={rule} className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4"><span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-600"><Check size={14}/></span><span className="text-sm font-semibold leading-relaxed text-slate-700">{rule}</span></li>)}</ul></section>
 
