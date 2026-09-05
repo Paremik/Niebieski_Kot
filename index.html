@@ -3,33 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- SEO & Meta -->
-    <title>Niebieski Kot | Kocia Kawiarnia Premium</title>
-    <meta name="description" content="Niebieski Kot — kocia kawiarnia w Opolu. Dobra kawa, spokojna przestrzeń i mruczący rezydenci." />
+    <title>Niebieski Kot | Kocia kawiarnia w Opolu</title>
+    <meta name="description" content="Niebieski Kot — kameralna kocia kawiarnia w Opolu. Specialty coffee, domowe słodkości i spokojne spotkania z mruczącymi rezydentami." />
+    <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#0f172a" />
-    <!-- Безопасные премиум-шрифты -->
+    <link rel="canonical" href="https://niebieski-kot.vercel.app/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:site_name" content="Niebieski Kot" />
+    <meta property="og:title" content="Niebieski Kot | Kocia kawiarnia w Opolu" />
+    <meta property="og:description" content="Dobra kawa, spokojna przestrzeń i mruczący rezydenci w sercu Opola." />
+    <meta property="og:url" content="https://niebieski-kot.vercel.app/" />
+    <meta property="og:image" content="https://niebieski-kot.vercel.app/images/menu-latte.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Niebieski Kot | Kocia kawiarnia w Opolu" />
+    <meta name="twitter:description" content="Dobra kawa, spokojna przestrzeń i mruczący rezydenci w sercu Opola." />
+    <meta name="twitter:image" content="https://niebieski-kot.vercel.app/images/menu-latte.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- Подключаем скрипт Tailwind безопасно для Vercel -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      // Конфигурация Tailwind прямо в браузере (до момента настройки полноценного PostCSS)
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: { sans: ['Outfit', 'sans-serif'] },
-            colors: {
-              navy: '#0F172A',
-              gold: '#D4AF37',
-              cream: '#FAFAFA'
-            }
-          }
-        }
-      }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-cream antialiased">
+  <body>
     <div id="root"></div>
     <script type="module" src="/main.jsx"></script>
   </body>
