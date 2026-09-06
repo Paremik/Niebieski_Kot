@@ -8,6 +8,18 @@ const cats = [
   { name: 'Mochi', linkLabel: 'Poznaj Mochiego', note: '6 lat · mistrz drzemek', story: 'Łagodny kocur znaleziony na działkach. Kocha miękkie koce, spokojne rozmowy i ludzi z książką na kolanach.', image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?q=85&w=900&auto=format&fit=crop', slug: 'mochi' },
   { name: 'Pixel', linkLabel: 'Poznaj Pixela', note: '2 lata · pierwszy do zabawy', story: 'Najmłodszy w ekipie i kandydat do adopcji. Wędkę wypatrzy z drugiego końca sali, a potem zasypia pod stolikiem.', image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=85&w=900&auto=format&fit=crop', slug: 'pixel' },
 ];
+const catTranslations = {
+  ru: {
+    luna: { linkLabel: 'Познакомиться с Луной', note: '4 года · спокойная наблюдательница', story: 'Она попала к нам после переезда своих хозяев. Больше всего любит сидеть у окна и сама выбирает момент для ласки.' },
+    mochi: { linkLabel: 'Познакомиться с Мочи', note: '6 лет · мастер сна', story: 'Мягкий кот, найденный на дачных участках. Любит тёплые пледы, спокойные разговоры и людей с книгой на коленях.' },
+    pixel: { linkLabel: 'Познакомиться с Пикселем', note: '2 года · первым готов играть', story: 'Самый младший в команде и кандидат на усыновление. Замечает удочку из другого конца комнаты, а потом засыпает под столом.' },
+  },
+  en: {
+    luna: { linkLabel: 'Meet Luna', note: '4 years · quiet observer', story: 'She came to us after her guardians moved. She loves sitting by the window and chooses the moment for affection herself.' },
+    mochi: { linkLabel: 'Meet Mochi', note: '6 years · nap champion', story: 'A gentle tomcat found near allotments. He loves soft blankets, quiet conversations and people reading with a book on their lap.' },
+    pixel: { linkLabel: 'Meet Pixel', note: '2 years · first to play', story: 'The youngest of the group and looking for a home. He spots a toy wand from across the room, then falls asleep under the table.' },
+  },
+};
 const rules = [
   'Przed wejściem do strefy kotów dezynfekujemy ręce.',
   'Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.',
@@ -28,6 +40,32 @@ const events = [
   { icon: Cat, tag: 'Dwie soboty w miesiącu', title: 'Czytania i warsztaty', text: 'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.', meta: '12:00 · 75 minut · od 20 zł' },
   { icon: PawPrint, tag: 'Pierwsza niedziela miesiąca', title: 'Dzień adopcji', text: 'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.', meta: 'Wstęp wolny · obowiązują zapisy' },
 ];
+const contentTranslations = {
+  ru: {
+    'Przed wejściem do strefy kotów dezynfekujemy ręce.': 'Перед входом в зону котов дезинфицируем руки.',
+    'Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.': 'Позволяем котам самим решать, нужен ли контакт — не будим их и не берём на руки.',
+    'Zdjęcia robimy bez lampy błyskowej, z szacunkiem dla kociego spokoju.': 'Фотографируем без вспышки и уважаем кошачий покой.',
+    'Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.': 'Дети могут приходить только под присмотром взрослых; детали уточнит команда.',
+    'Każda niedziela': 'Каждое воскресенье', 'Każdy piątek': 'Каждую пятницу', 'Dwie soboty w miesiącu': 'Две субботы в месяц', 'Pierwsza niedziela miesiąca': 'Первое воскресенье месяца',
+    'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.': 'Мягкая практика для начинающих, спокойная музыка и коты, гуляющие по залу.',
+    'Małe grupy, przytulne gry i gorący napój z naszej karty.': 'Небольшие компании, уютные игры и горячий напиток из нашего меню.',
+    'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.': 'Истории о животных, творческие занятия и спокойный формат для всей семьи.',
+    'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.': 'Познакомьтесь с нашими котами, поговорите с волонтёрами и подготовьтесь к ответственному усыновлению.',
+    'Wstęp wolny · obowiązują zapisy': 'Вход свободный · нужна запись', 'Gotowy na spotkanie': 'Готов к встрече'
+  },
+  en: {
+    'Przed wejściem do strefy kotów dezynfekujemy ręce.': 'Please sanitise your hands before entering the cat area.',
+    'Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.': 'Let the cats choose contact — do not wake them or pick them up.',
+    'Zdjęcia robimy bez lampy błyskowej, z szacunkiem dla kociego spokoju.': 'Please take photos without flash and respect the cats’ calm.',
+    'Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.': 'Children are welcome with continuous adult supervision; ask the team for details.',
+    'Każda niedziela': 'Every Sunday', 'Każdy piątek': 'Every Friday', 'Dwie soboty w miesiącu': 'Two Saturdays each month', 'Pierwsza niedziela miesiąca': 'First Sunday of the month',
+    'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.': 'A gentle practice for beginners, calm music and cats wandering around the room.',
+    'Małe grupy, przytulne gry i gorący napój z naszej karty.': 'Small groups, cosy games and a hot drink from our menu.',
+    'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.': 'Animal stories, creative activities and a calm format for the whole family.',
+    'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.': 'Meet our cats, talk with volunteers and prepare for responsible adoption.',
+    'Wstęp wolny · obowiązują zapisy': 'Free entry · registration required', 'Gotowy na spotkanie': 'Ready to meet'
+  }
+};
 const languageCopy = {
   pl: { nav: ['O nas', 'Koty', 'Menu', 'Zasady', 'Wydarzenia', 'Wesprzyj', 'Wizyta'], ask: 'Zapytaj nas', booking: 'Zarezerwuj stolik', cats: 'Poznaj koty', eyebrow: 'Kocia kawiarnia · Opole', hero: 'Zwolnij. Kawa stygnie, koty nie.', intro: 'Spokojne miejsce na dobrą kawę, miękki fotel i spotkanie z kotami, które naprawdę nadają temu miejscu rytm.' },
   ru: { nav: ['О нас', 'Коты', 'Меню', 'Правила', 'События', 'Поддержать', 'Визит'], ask: 'Спросить нас', booking: 'Забронировать столик', cats: 'Познакомиться с котами', eyebrow: 'Котокафе · Ополе', hero: 'Замедлись. Кофе остывает, коты — нет.', intro: 'Уютное место для хорошего кофе, мягкого кресла и встречи с котами, которые задают этому месту свой ритм.' },
@@ -105,7 +143,9 @@ export default function App() {
     const sourcePage = pageCopy.pl;
     const targetPage = pageCopy[language] || sourcePage;
     const pageMap = Object.fromEntries(Object.keys(sourcePage).map((key) => [sourcePage[key], targetPage[key]]));
-    const map = { ...pageMap, ...(domTranslations[language] || {}), ...(extraTranslations[language] || {}), ...(detailTranslations[language] || {}) };
+    const targetCats = catTranslations[language] || {};
+    const catMap = Object.fromEntries(cats.flatMap((cat) => Object.keys(cat).filter((key) => ['linkLabel', 'note', 'story'].includes(key)).map((key) => [cat[key], targetCats[cat.slug]?.[key] || cat[key]])));
+    const map = { ...pageMap, ...catMap, ...(contentTranslations[language] || {}), ...(domTranslations[language] || {}), ...(extraTranslations[language] || {}), ...(detailTranslations[language] || {}) };
     if (!map) return undefined;
     const translate = () => {
       const walker = document.createTreeWalker(document.getElementById('top') || document.body, NodeFilter.SHOW_TEXT);
