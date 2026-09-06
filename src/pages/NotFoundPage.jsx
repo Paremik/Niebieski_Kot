@@ -1,3 +1,4 @@
+import React from 'react'
 import { ArrowLeft, Cat } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
