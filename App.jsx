@@ -66,6 +66,36 @@ const contentTranslations = {
     'Wstęp wolny · obowiązują zapisy': 'Free entry · registration required', 'Gotowy na spotkanie': 'Ready to meet'
   }
 };
+const blockTranslations = {
+  ru: {
+    'Mam alergię na koty — czy mogę odwiedzić kawiarnię?': 'У меня аллергия на кошек — могу ли я посетить кафе?',
+    'Czy można przyjść z własnym zwierzęciem?': 'Можно ли прийти со своим животным?',
+    'W poniedziałki lokal jest zamknięty — to dzień ciszy dla kotów.': 'По понедельникам кафе закрыто — это тихий день для котов.',
+    'ul. Krakowska 32, 45-075 Opole': 'ул. Krakowska 32, 45-075 Ополе',
+    '5 minut spacerem od opolskiego Rynku · adres koncepcyjny.': '5 минут пешком от Рыночной площади Ополе · концептуальный адрес.',
+    'Stoliki na 90 minut': 'Столики на 90 минут',
+    'W weekend rezerwacja zalecana. Dzieci od 8 lat, zawsze pod opieką dorosłego.': 'На выходных рекомендуем бронирование. Дети от 8 лет — только под присмотром взрослых.',
+    'Wirtualna kawa': 'Виртуальный кофе', 'Miska na dziś': 'Миска на сегодня', 'Wsparcie leczenia': 'Поддержка лечения',
+    'na codzienną opiekę': 'на ежедневный уход', 'na karmę i żwirek': 'на корм и наполнитель', 'na badania i wizyty': 'на обследования и визиты',
+    'mokra karma dobrej jakości': 'качественный влажный корм', 'żwirek bentonitowy bez zapachu': 'бентонитовый наполнитель без запаха', 'polarowe koce i ręczniki': 'флисовые пледы и полотенца', 'transportery w dobrym stanie': 'переноски в хорошем состоянии', 'preparaty na pchły i kleszcze': 'средства от блох и клещей', 'środki do bezpiecznego sprzątania': 'безопасные средства для уборки',
+    'Wizyta wiąże się z obecnością sierści i alergenów, dlatego nie możemy zagwarantować bezpiecznych warunków dla osób z alergią. Jeśli objawy są łagodne, przed rezerwacją skonsultuj wizytę z lekarzem i poinformuj obsługę.': 'В кафе есть шерсть и аллергены, поэтому мы не можем гарантировать безопасные условия. Перед визитом проконсультируйтесь с врачом и предупредите команду.',
+    'Nie. Nawet spokojny pies lub kot może stresować naszych rezydentów. Wyjątek stanowią certyfikowane psy asystujące — prosimy o wcześniejszy kontakt.': 'Нет. Даже спокойное животное может вызвать стресс у жителей кафе. Исключение — сертифицированные собаки-поводыри; предупредите нас заранее.'
+  },
+  en: {
+    'Mam alergię na koty — czy mogę odwiedzić kawiarnię?': 'I have a cat allergy — can I visit the café?',
+    'Czy można przyjść z własnym zwierzęciem?': 'Can I bring my own pet?',
+    'W poniedziałki lokal jest zamknięty — to dzień ciszy dla kotów.': 'The café is closed on Mondays — it is a quiet day for the cats.',
+    'ul. Krakowska 32, 45-075 Opole': '32 Krakowska St, 45-075 Opole',
+    '5 minut spacerem od opolskiego Rynku · adres koncepcyjny.': 'A 5-minute walk from Opole Market Square · concept address.',
+    'Stoliki na 90 minut': '90-minute tables',
+    'W weekend rezerwacja zalecana. Dzieci od 8 lat, zawsze pod opieką dorosłego.': 'Reservations are recommended on weekends. Children aged 8+ must be supervised by an adult.',
+    'Wirtualna kawa': 'Virtual coffee', 'Miska na dziś': 'Today’s bowl', 'Wsparcie leczenia': 'Treatment support',
+    'na codzienną opiekę': 'for daily care', 'na karmę i żwirek': 'for food and litter', 'na badania i wizyty': 'for check-ups and visits',
+    'mokra karma dobrej jakości': 'quality wet food', 'żwirek bentonitowy bez zapachu': 'unscented bentonite litter', 'polarowe koce i ręczniki': 'fleece blankets and towels', 'transportery w dobrym stanie': 'carriers in good condition', 'preparaty na pchły i kleszcze': 'flea and tick treatments', 'środki do bezpiecznego sprzątania': 'safe cleaning supplies',
+    'Wizyta wiąże się z obecnością sierści i alergenów, dlatego nie możemy zagwarantować bezpiecznych warunków dla osób z alergią. Jeśli objawy są łagodne, przed rezerwacją skonsultuj wizytę z lekarzem i poinformuj obsługę.': 'The café contains fur and allergens, so we cannot guarantee safe conditions. Please consult your doctor and tell the team before booking.',
+    'Nie. Nawet spokojny pies lub kot może stresować naszych rezydentów. Wyjątek stanowią certyfikowane psy asystujące — prosimy o wcześniejszy kontakt.': 'No. Even a calm animal can stress our residents. Certified assistance dogs are the exception; please contact us first.'
+  }
+};
 const languageCopy = {
   pl: { nav: ['O nas', 'Koty', 'Menu', 'Zasady', 'Wydarzenia', 'Wesprzyj', 'Wizyta'], ask: 'Zapytaj nas', booking: 'Zarezerwuj stolik', cats: 'Poznaj koty', eyebrow: 'Kocia kawiarnia · Opole', hero: 'Zwolnij. Kawa stygnie, koty nie.', intro: 'Spokojne miejsce na dobrą kawę, miękki fotel i spotkanie z kotami, które naprawdę nadają temu miejscu rytm.' },
   ru: { nav: ['О нас', 'Коты', 'Меню', 'Правила', 'События', 'Поддержать', 'Визит'], ask: 'Спросить нас', booking: 'Забронировать столик', cats: 'Познакомиться с котами', eyebrow: 'Котокафе · Ополе', hero: 'Замедлись. Кофе остывает, коты — нет.', intro: 'Уютное место для хорошего кофе, мягкого кресла и встречи с котами, которые задают этому месту свой ритм.' },
@@ -145,7 +175,7 @@ export default function App() {
     const pageMap = Object.fromEntries(Object.keys(sourcePage).map((key) => [sourcePage[key], targetPage[key]]));
     const targetCats = catTranslations[language] || {};
     const catMap = Object.fromEntries(cats.flatMap((cat) => Object.keys(cat).filter((key) => ['linkLabel', 'note', 'story'].includes(key)).map((key) => [cat[key], targetCats[cat.slug]?.[key] || cat[key]])));
-    const map = { ...pageMap, ...catMap, ...(contentTranslations[language] || {}), ...(domTranslations[language] || {}), ...(extraTranslations[language] || {}), ...(detailTranslations[language] || {}) };
+    const map = { ...pageMap, ...catMap, ...(contentTranslations[language] || {}), ...(blockTranslations[language] || {}), ...(domTranslations[language] || {}), ...(extraTranslations[language] || {}), ...(detailTranslations[language] || {}) };
     if (!map) return undefined;
     const translate = () => {
       const walker = document.createTreeWalker(document.getElementById('top') || document.body, NodeFilter.SHOW_TEXT);
