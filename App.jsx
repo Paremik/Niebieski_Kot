@@ -52,6 +52,14 @@ const domTranslations = {
     'zero pośpiechu ✦': 'no rush ✦', 'Wspieramy adopcje': 'We support adoption', 'Specialty coffee': 'Specialty coffee', 'Nasza idea': 'Our idea', 'Dobre rzeczy dzieją się wolniej.': 'Good things happen more slowly.', 'Tworzymy kameralną kawiarnię, w której dobrostan kotów jest równie ważny jak smak espresso.': 'We are creating an intimate café where cat wellbeing matters as much as the taste of espresso.', 'Każdy rezydent ma własną historię, charakter i przestrzeń. Ty dostajesz chwilę oddechu — on wybór, czy chce dołączyć.': 'Every resident has a story, personality and space. You get a moment to breathe — they choose whether to connect.', 'Nasi gospodarze': 'Our hosts', 'Poznaj ekipę.': 'Meet the team.', 'Każdy inny. Każdy u siebie. Pixel szuka domu, Luna i Mochi są stałymi gospodarzami.': 'Each one is different and at home here. Pixel is looking for a home; Luna and Mochi are resident hosts.', 'Jedzenie i napoje': 'Food and drinks', 'Kocia karta ma własne miejsce.': 'The cat café has its own menu.', 'Kawy specialty, śniadania, lekkie dania i domowe słodkości — teraz w przejrzystym menu z cenami.': 'Specialty coffee, breakfast, light dishes and homemade sweets — all with clear prices.', 'Otwórz pełne menu': 'Open full menu', 'Koci savoir-vivre': 'Cat etiquette', 'Kilka zasad.': 'A few rules.', 'Dużo spokoju.': 'Lots of calm.', 'To dom naszych rezydentów. Proste reguły sprawiają, że wszystkim — na dwóch i czterech łapach — jest tu dobrze.': 'This is our residents’ home. Simple rules help everyone feel comfortable.', 'FAQ pierwszej wizyty': 'First visit FAQ', 'Dobrze wiedzieć przed przyjściem.': 'Good to know before you come.', 'Zanim wpadniesz': 'Before you visit', 'Zaplanuj miękkie lądowanie.': 'Plan a soft landing.', 'Zarezerwuj stolik': 'Book a table', 'Zapytaj asystenta': 'Ask the assistant', 'Pokaż mapę': 'Show map', 'Dla naszych kotów': 'For our cats', 'Mały gest.': 'A small gesture.', 'Dużo spokoju.': 'A lot of calm.', 'Wesprzyj koty': 'Support the cats', 'Lista potrzeb': 'Wish list', 'Co przyda się najbardziej?': 'What helps most?', 'W kalendarzu kociej kawiarni': 'In the cat café calendar', 'Wydarzenia, na które chce się wracać.': 'Events worth coming back for.', 'Zapisz się': 'Sign up', 'Czy można przyjść z dziećmi?': 'Can I bring children?', 'Czy można przynieść własne jedzenie?': 'Can I bring my own food?', 'Czy trzeba rezerwować miejsce?': 'Do I need a reservation?', 'Joga z kotami': 'Cat yoga', 'Wieczór gier planszowych': 'Board game night', 'Czytania i warsztaty': 'Readings and workshops', 'Dzień adopcji': 'Adoption day'
   },
 };
+const extraTranslations = {
+  ru: {
+    'Własne jedzenie oraz smakołyki dla kotów zostawiamy poza lokalem.': 'Свою еду и лакомства для котов оставляем за пределами кафе.', 'Przed wejściem do strefy kotów dezynfekujemy ręce.': 'Перед входом в зону котов дезинфицируем руки.', 'Nie budzimy ich i nie bierzemy na ręce.': 'Не будим котов и не берём их на руки.', 'Projekt koncepcyjny — adres, kontakt i bohaterowie są demonstracyjne.': 'Концептуальный проект — адрес, контакты и истории котов демонстрационные.', 'Niebieski Asystent': 'Ассистент Niebieski Kot', 'szybkie odpowiedzi': 'быстрые ответы', 'Piszę…': 'Печатаю…'
+  },
+  en: {
+    'Własne jedzenie oraz smakołyki dla kotów zostawiamy poza lokalem.': 'Please leave your own food and cat treats outside the café.', 'Przed wejściem do strefy kotów dezynfekujemy ręce.': 'Please sanitise your hands before entering the cat area.', 'Nie budzimy ich i nie bierzemy na ręce.': 'Do not wake the cats or pick them up.', 'Projekt koncepcyjny — adres, kontakt i bohaterowie są demonstracyjne.': 'Concept project — the address, contact details and cat stories are demonstrational.', 'Niebieski Asystent': 'Niebieski Kot Assistant', 'szybkie odpowiedzi': 'quick answers', 'Piszę…': 'Typing…'
+  },
+};
 const menuSlides = [
   { image: '/images/menu-latte.webp', alt: 'Kocie latte z maślanym ciasteczkiem', label: 'Kocie latte' },
   { image: '/images/menu-toast.webp', alt: 'Grzanka z kozim serem i pieczonym burakiem', label: 'Grzanka z kozim serem' },
@@ -77,7 +85,7 @@ export default function App() {
   }, []);
   useEffect(() => {
     document.documentElement.lang = language;
-    const map = domTranslations[language];
+    const map = { ...(domTranslations[language] || {}), ...(extraTranslations[language] || {}) };
     if (!map) return undefined;
     const translate = () => {
       const walker = document.createTreeWalker(document.getElementById('top') || document.body, NodeFilter.SHOW_TEXT);
