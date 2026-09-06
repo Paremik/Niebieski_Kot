@@ -59,9 +59,12 @@ pnpm test
 ## Структура проекта
 
 ```text
-App.jsx                главная страница, локализация и основные секции
-MenuPage.jsx           страница меню
-CatProfilePage.jsx     профили Luna, Mochi и Pixel
+App.jsx                совместимый home-контейнер и локализация главной
+src/pages/             точки входа HomePage, MenuPage и CatProfilePage
+src/components/        переиспользуемые UI-компоненты и модальные окна
+src/data/              данные котов, правил, FAQ, событий и меню
+MenuPage.jsx           реализация страницы меню
+CatProfilePage.jsx     реализация профилей Luna, Mochi и Pixel
 BookingModal.jsx       форма бронирования
 SupportModal.jsx       демонстрационная поддержка котов
 AdminPage.jsx          локальная админ-панель

@@ -2,100 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, CalendarDays, Cat, Check, ChevronLeft, ChevronRight, Clock3, Coffee, Globe2, Heart, HeartHandshake, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, ShoppingBasket, X } from 'lucide-react';
 import BookingModal from './BookingModal.jsx';
 import SupportModal from './SupportModal.jsx';
+import { cats, rules, faqItems, events, menuSlides, catOfDay } from './src/data/homeData.js';
+import InfoRow from './src/components/InfoRow.jsx';
 
-const cats = [
-  { name: 'Luna', linkLabel: 'Poznaj Lunę', note: '4 lata · spokojna obserwatorka', story: 'Trafiła do nas po przeprowadzce opiekunów. Najchętniej siedzi przy oknie i sama wybiera moment na głaskanie.', image: 'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?q=85&w=900&auto=format&fit=crop', slug: 'luna' },
-  { name: 'Mochi', linkLabel: 'Poznaj Mochiego', note: '6 lat · mistrz drzemek', story: 'Łagodny kocur znaleziony na działkach. Kocha miękkie koce, spokojne rozmowy i ludzi z książką na kolanach.', image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?q=85&w=900&auto=format&fit=crop', slug: 'mochi' },
-  { name: 'Pixel', linkLabel: 'Poznaj Pixela', note: '2 lata · pierwszy do zabawy', story: 'Najmłodszy w ekipie i kandydat do adopcji. Wędkę wypatrzy z drugiego końca sali, a potem zasypia pod stolikiem.', image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=85&w=900&auto=format&fit=crop', slug: 'pixel' },
-];
-const catTranslations = {
-  ru: {
-    luna: { linkLabel: 'Познакомиться с Луной', note: '4 года · спокойная наблюдательница', story: 'Она попала к нам после переезда своих хозяев. Больше всего любит сидеть у окна и сама выбирает момент для ласки.' },
-    mochi: { linkLabel: 'Познакомиться с Мочи', note: '6 лет · мастер сна', story: 'Мягкий кот, найденный на дачных участках. Любит тёплые пледы, спокойные разговоры и людей с книгой на коленях.' },
-    pixel: { linkLabel: 'Познакомиться с Пикселем', note: '2 года · первым готов играть', story: 'Самый младший в команде и кандидат на усыновление. Замечает удочку из другого конца комнаты, а потом засыпает под столом.' },
-  },
-  en: {
-    luna: { linkLabel: 'Meet Luna', note: '4 years · quiet observer', story: 'She came to us after her guardians moved. She loves sitting by the window and chooses the moment for affection herself.' },
-    mochi: { linkLabel: 'Meet Mochi', note: '6 years · nap champion', story: 'A gentle tomcat found near allotments. He loves soft blankets, quiet conversations and people reading with a book on their lap.' },
-    pixel: { linkLabel: 'Meet Pixel', note: '2 years · first to play', story: 'The youngest of the group and looking for a home. He spots a toy wand from across the room, then falls asleep under the table.' },
-  },
-};
-const rules = [
-  'Przed wejściem do strefy kotów dezynfekujemy ręce.',
-  'Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.',
-  'Zdjęcia robimy bez lampy błyskowej, z szacunkiem dla kociego spokoju.',
-  'Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.',
-  'Własne jedzenie oraz smakołyki dla kotów zostawiamy poza lokalem.',
-];
-const faqItems = [
-  { question: 'Czy można przyjść z dziećmi?', answer: 'Tak. Zapraszamy dzieci od 8 lat, zawsze pod opieką dorosłego. Prosimy, aby dzieci nie biegały i pozwalały kotom samodzielnie decydować o kontakcie.' },
-  { question: 'Mam alergię na koty — czy mogę odwiedzić kawiarnię?', answer: 'Wizyta wiąże się z obecnością sierści i alergenów, dlatego nie możemy zagwarantować bezpiecznych warunków dla osób z alergią. Jeśli objawy są łagodne, przed rezerwacją skonsultuj wizytę z lekarzem i poinformuj obsługę.' },
-  { question: 'Czy można przynieść własne jedzenie?', answer: 'Nie. Ze względów higienicznych i bezpieczeństwa kotów własne jedzenie oraz napoje zostawiamy poza lokalem. Na miejscu czeka menu kawiarni z opcjami wegetariańskimi.' },
-  { question: 'Czy można przyjść z własnym zwierzęciem?', answer: 'Nie. Nawet spokojny pies lub kot może stresować naszych rezydentów. Wyjątek stanowią certyfikowane psy asystujące — prosimy o wcześniejszy kontakt.' },
-  { question: 'Czy trzeba rezerwować miejsce?', answer: 'W tygodniu zwykle wystarczy przyjść, ale rezerwacja daje pewność miejsca. W weekendy i podczas wydarzeń polecamy zarezerwować stolik z wyprzedzeniem.' },
-];
-const events = [
-  { icon: Heart, tag: 'Każda niedziela', title: 'Joga z kotami', text: 'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.', meta: '10:00 · 60 minut · 45 zł' },
-  { icon: Coffee, tag: 'Każdy piątek', title: 'Wieczór gier planszowych', text: 'Małe grupy, przytulne gry i gorący napój z naszej karty.', meta: '18:00 · 90 minut · 25 zł' },
-  { icon: Cat, tag: 'Dwie soboty w miesiącu', title: 'Czytania i warsztaty', text: 'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.', meta: '12:00 · 75 minut · od 20 zł' },
-  { icon: PawPrint, tag: 'Pierwsza niedziela miesiąca', title: 'Dzień adopcji', text: 'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.', meta: 'Wstęp wolny · obowiązują zapisy' },
-];
-const contentTranslations = {
-  ru: {
-    'Przed wejściem do strefy kotów dezynfekujemy ręce.': 'Перед входом в зону котов дезинфицируем руки.',
-    'Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.': 'Позволяем котам самим решать, нужен ли контакт — не будим их и не берём на руки.',
-    'Zdjęcia robimy bez lampy błyskowej, z szacunkiem dla kociego spokoju.': 'Фотографируем без вспышки и уважаем кошачий покой.',
-    'Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.': 'Дети могут приходить только под присмотром взрослых; детали уточнит команда.',
-    'Każda niedziela': 'Каждое воскресенье', 'Każdy piątek': 'Каждую пятницу', 'Dwie soboty w miesiącu': 'Две субботы в месяц', 'Pierwsza niedziela miesiąca': 'Первое воскресенье месяца',
-    'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.': 'Мягкая практика для начинающих, спокойная музыка и коты, гуляющие по залу.',
-    'Małe grupy, przytulne gry i gorący napój z naszej karty.': 'Небольшие компании, уютные игры и горячий напиток из нашего меню.',
-    'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.': 'Истории о животных, творческие занятия и спокойный формат для всей семьи.',
-    'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.': 'Познакомьтесь с нашими котами, поговорите с волонтёрами и подготовьтесь к ответственному усыновлению.',
-    'Wstęp wolny · obowiązują zapisy': 'Вход свободный · нужна запись', 'Gotowy na spotkanie': 'Готов к встрече'
-  },
-  en: {
-    'Przed wejściem do strefy kotów dezynfekujemy ręce.': 'Please sanitise your hands before entering the cat area.',
-    'Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.': 'Let the cats choose contact — do not wake them or pick them up.',
-    'Zdjęcia robimy bez lampy błyskowej, z szacunkiem dla kociego spokoju.': 'Please take photos without flash and respect the cats’ calm.',
-    'Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.': 'Children are welcome with continuous adult supervision; ask the team for details.',
-    'Każda niedziela': 'Every Sunday', 'Każdy piątek': 'Every Friday', 'Dwie soboty w miesiącu': 'Two Saturdays each month', 'Pierwsza niedziela miesiąca': 'First Sunday of the month',
-    'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.': 'A gentle practice for beginners, calm music and cats wandering around the room.',
-    'Małe grupy, przytulne gry i gorący napój z naszej karty.': 'Small groups, cosy games and a hot drink from our menu.',
-    'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.': 'Animal stories, creative activities and a calm format for the whole family.',
-    'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.': 'Meet our cats, talk with volunteers and prepare for responsible adoption.',
-    'Wstęp wolny · obowiązują zapisy': 'Free entry · registration required', 'Gotowy na spotkanie': 'Ready to meet'
-  }
-};
-const blockTranslations = {
-  ru: {
-    'Mam alergię na koty — czy mogę odwiedzić kawiarnię?': 'У меня аллергия на кошек — могу ли я посетить кафе?',
-    'Czy można przyjść z własnym zwierzęciem?': 'Можно ли прийти со своим животным?',
-    'W poniedziałki lokal jest zamknięty — to dzień ciszy dla kotów.': 'По понедельникам кафе закрыто — это тихий день для котов.',
-    'ul. Krakowska 32, 45-075 Opole': 'ул. Krakowska 32, 45-075 Ополе',
-    '5 minut spacerem od opolskiego Rynku · adres koncepcyjny.': '5 минут пешком от Рыночной площади Ополе · концептуальный адрес.',
-    'Stoliki na 90 minut': 'Столики на 90 минут',
-    'W weekend rezerwacja zalecana. Dzieci od 8 lat, zawsze pod opieką dorosłego.': 'На выходных рекомендуем бронирование. Дети от 8 лет — только под присмотром взрослых.',
-    'Wirtualna kawa': 'Виртуальный кофе', 'Miska na dziś': 'Миска на сегодня', 'Wsparcie leczenia': 'Поддержка лечения',
-    'na codzienną opiekę': 'на ежедневный уход', 'na karmę i żwirek': 'на корм и наполнитель', 'na badania i wizyty': 'на обследования и визиты',
-    'mokra karma dobrej jakości': 'качественный влажный корм', 'żwirek bentonitowy bez zapachu': 'бентонитовый наполнитель без запаха', 'polarowe koce i ręczniki': 'флисовые пледы и полотенца', 'transportery w dobrym stanie': 'переноски в хорошем состоянии', 'preparaty na pchły i kleszcze': 'средства от блох и клещей', 'środki do bezpiecznego sprzątania': 'безопасные средства для уборки',
-    'Wizyta wiąże się z obecnością sierści i alergenów, dlatego nie możemy zagwarantować bezpiecznych warunków dla osób z alergią. Jeśli objawy są łagodne, przed rezerwacją skonsultuj wizytę z lekarzem i poinformuj obsługę.': 'В кафе есть шерсть и аллергены, поэтому мы не можем гарантировать безопасные условия. Перед визитом проконсультируйтесь с врачом и предупредите команду.',
-    'Nie. Nawet spokojny pies lub kot może stresować naszych rezydentów. Wyjątek stanowią certyfikowane psy asystujące — prosimy o wcześniejszy kontakt.': 'Нет. Даже спокойное животное может вызвать стресс у жителей кафе. Исключение — сертифицированные собаки-поводыри; предупредите нас заранее.'
-  },
-  en: {
-    'Mam alergię na koty — czy mogę odwiedzić kawiarnię?': 'I have a cat allergy — can I visit the café?',
-    'Czy można przyjść z własnym zwierzęciem?': 'Can I bring my own pet?',
-    'W poniedziałki lokal jest zamknięty — to dzień ciszy dla kotów.': 'The café is closed on Mondays — it is a quiet day for the cats.',
-    'ul. Krakowska 32, 45-075 Opole': '32 Krakowska St, 45-075 Opole',
-    '5 minut spacerem od opolskiego Rynku · adres koncepcyjny.': 'A 5-minute walk from Opole Market Square · concept address.',
-    'Stoliki na 90 minut': '90-minute tables',
-    'W weekend rezerwacja zalecana. Dzieci od 8 lat, zawsze pod opieką dorosłego.': 'Reservations are recommended on weekends. Children aged 8+ must be supervised by an adult.',
-    'Wirtualna kawa': 'Virtual coffee', 'Miska na dziś': 'Today’s bowl', 'Wsparcie leczenia': 'Treatment support',
-    'na codzienną opiekę': 'for daily care', 'na karmę i żwirek': 'for food and litter', 'na badania i wizyty': 'for check-ups and visits',
-    'mokra karma dobrej jakości': 'quality wet food', 'żwirek bentonitowy bez zapachu': 'unscented bentonite litter', 'polarowe koce i ręczniki': 'fleece blankets and towels', 'transportery w dobrym stanie': 'carriers in good condition', 'preparaty na pchły i kleszcze': 'flea and tick treatments', 'środki do bezpiecznego sprzątania': 'safe cleaning supplies',
-    'Wizyta wiąże się z obecnością sierści i alergenów, dlatego nie możemy zagwarantować bezpiecznych warunków dla osób z alergią. Jeśli objawy są łagodne, przed rezerwacją skonsultuj wizytę z lekarzem i poinformuj obsługę.': 'The café contains fur and allergens, so we cannot guarantee safe conditions. Please consult your doctor and tell the team before booking.',
-    'Nie. Nawet spokojny pies lub kot może stresować naszych rezydentów. Wyjątek stanowią certyfikowane psy asystujące — prosimy o wcześniejszy kontakt.': 'No. Even a calm animal can stress our residents. Certified assistance dogs are the exception; please contact us first.'
-  }
-};
 const languageCopy = {
   pl: { nav: ['O nas', 'Koty', 'Menu', 'Zasady', 'Wydarzenia', 'Wesprzyj', 'Wizyta'], ask: 'Zapytaj nas', booking: 'Zarezerwuj stolik', cats: 'Poznaj koty', eyebrow: 'Kocia kawiarnia · Opole', hero: 'Zwolnij. Kawa stygnie, koty nie.', intro: 'Spokojne miejsce na dobrą kawę, miękki fotel i spotkanie z kotami, które naprawdę nadają temu miejscu rytm.' },
   ru: { nav: ['О нас', 'Коты', 'Меню', 'Правила', 'События', 'Поддержать', 'Визит'], ask: 'Спросить нас', booking: 'Забронировать столик', cats: 'Познакомиться с котами', eyebrow: 'Котокафе · Ополе', hero: 'Замедлись. Кофе остывает, коты — нет.', intro: 'Уютное место для хорошего кофе, мягкого кресла и встречи с котами, которые задают этому месту свой ритм.' },
@@ -137,20 +46,6 @@ const detailTranslations = {
     'Przed wejściem do strefy kotów dezynfekujemy ręce.': 'Please sanitise your hands before entering the cat area.', 'Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.': 'Let the cats choose contact — do not wake them or pick them up.', 'Zdjęcia robimy bez lampy błyskowej, z szacunkiem dla kociego spokoju.': 'Please take photos without flash and respect the cats’ calm.', 'Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.': 'Children are welcome with continuous adult supervision; ask the team for details.', 'Własne jedzenie oraz smakołyki dla kotów zostawiamy poza lokalem.': 'Please leave your own food and cat treats outside the café.', 'Wizyta wiąże się z obecnością sierści i alergenów, dlatego nie możemy zagwarantować bezpiecznych warunków dla osób z alergią. Jeśli objawy są łagodne, przed rezerwacją skonsultuj wizytę z lekarzem i poinformuj obsługę.': 'The café contains fur and allergens, so we cannot guarantee safe conditions. Please consult your doctor and tell the team before booking.', 'Nie. Ze względów higienicznych i bezpieczeństwa kotów własne jedzenie oraz napoje zostawiamy poza lokalem. Na miejscu czeka menu kawiarni z opcjami wegetariańskimi.': 'No. For hygiene and cat safety, please leave your own food and drinks outside. Vegetarian options are available.', 'Nie. Nawet spokojny pies lub kot może stresować naszych rezydentów. Wyjątek stanowią certyfikowane psy asystujące — prosimy o wcześniejszy kontakt.': 'No. Even a calm animal can stress our residents. Certified assistance dogs are the exception; please contact us first.', 'W tygodniu zwykle wystarczy przyjść, ale rezerwacja daje pewność miejsca. W weekendy i podczas wydarzeń polecamy zarezerwować stolik z wyprzedzeniem.': 'You can usually walk in during the week, but a reservation guarantees a place. We recommend booking ahead for weekends and events.'
   },
 };
-const menuSlides = [
-  { image: '/images/menu-latte.webp', alt: 'Kocie latte z maślanym ciasteczkiem', label: 'Kocie latte' },
-  { image: '/images/menu-toast.webp', alt: 'Grzanka z kozim serem i pieczonym burakiem', label: 'Grzanka z kozim serem' },
-  { image: '/images/menu-cheesecake.webp', alt: 'Sernik baskijski z owocami i matchą', label: 'Sernik baskijski' },
-];
-const catOfDay = {
-  name: 'Pixel',
-  slug: 'pixel',
-  image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=88&w=1200&auto=format&fit=crop',
-  pl: { label: 'Kot dnia', eyebrow: 'Poznaj go spokojnie', mood: 'Gotowy na spotkanie', activity: 'Dziś poluje na zabawkową myszkę i szuka osoby, która podaruje mu chwilę spokojnej uwagi.', button: 'Otwórz profil' },
-  ru: { label: 'Кот дня', eyebrow: 'Познакомься с ним спокойно', mood: 'Готов к встрече', activity: 'Сегодня охотится на игрушечную мышку и ищет человека, который подарит ему немного спокойного внимания.', button: 'Открыть профиль' },
-  en: { label: 'Cat of the day', eyebrow: 'Meet him at his own pace', mood: 'Ready to meet', activity: 'Today he is hunting a toy mouse and looking for someone to give him a little calm attention.', button: 'Open profile' },
-};
-
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -251,7 +146,7 @@ export default function App() {
 
       <section id="rules" className="mx-auto max-w-6xl px-5 py-24 sm:px-8"><div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr]"><div><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">Koci savoir-vivre</span><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Kilka zasad.<br/>Dużo spokoju.</h2><p className="mt-5 max-w-md leading-relaxed text-slate-600">To dom naszych rezydentów. Proste reguły sprawiają, że wszystkim — na dwóch i czterech łapach — jest tu dobrze.</p><ul className="mt-8 space-y-3">{rules.map((rule) => <li key={rule} className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4"><span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-600"><Check size={14}/></span><span className="text-sm font-semibold leading-relaxed text-slate-700">{rule}</span></li>)}</ul></div><div><div className="mb-5 flex items-center justify-between"><div><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">FAQ pierwszej wizyty</span><h3 className="mt-2 text-3xl font-black tracking-tight">Dobrze wiedzieć przed przyjściem.</h3></div><ShieldCheck className="hidden text-sky-500 sm:block" size={30}/></div><div className="space-y-3">{faqItems.map(({ question, answer }) => <details key={question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-extrabold text-slate-800 marker:hidden"><span>{question}</span><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-600 text-xl leading-none transition group-open:rotate-45">+</span></summary><p className="pt-4 text-sm leading-relaxed text-slate-600">{answer}</p></details>)}</div></div></div></section>
 
-      <section id="visit" className="mx-auto max-w-6xl px-5 pb-24 pt-10 sm:px-8"><div className="grid overflow-hidden rounded-[3rem] bg-white shadow-xl lg:grid-cols-[1fr_.9fr]"><div className="p-7 sm:p-12"><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">Zanim wpadniesz</span><h2 className="mt-3 text-4xl font-black tracking-tight">Zaplanuj miękkie lądowanie.</h2><div className="mt-9 space-y-5"><Info icon={Clock3} title="Wt–Pt 11:00–20:00 · Sob–Nd 10:00–20:00" text="W poniedziałki lokal jest zamknięty — to dzień ciszy dla kotów."/><Info icon={MapPin} title="ul. Krakowska 32, 45-075 Opole" text="5 minut spacerem od opolskiego Rynku · adres koncepcyjny."/><Info icon={CalendarDays} title="Stoliki na 90 minut" text="W weekend rezerwacja zalecana. Dzieci od 8 lat, zawsze pod opieką dorosłego."/></div><div className="mt-9 flex flex-wrap gap-3"><button onClick={() => setBookingOpen(true)} className="flex items-center gap-2 rounded-full bg-sky-500 px-6 py-3.5 font-bold text-white transition hover:-translate-y-1 hover:bg-sky-600">Zarezerwuj stolik <CalendarDays size={18}/></button><button onClick={() => setChatOpen(true)} className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">Zapytaj asystenta <MessageCircle size={18}/></button><a href="https://www.openstreetmap.org/search?query=Krakowska%2032%20Opole" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">Pokaż mapę <MapPin size={18}/></a></div></div><div className="relative min-h-[380px]"><img src="https://images.unsplash.com/photo-1511081692775-05d0f180a065?q=85&w=1200&auto=format&fit=crop" alt="Przytulne wnętrze kawiarni" loading="lazy" className="absolute inset-0 h-full w-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 to-transparent"/></div></div></section>
+      <section id="visit" className="mx-auto max-w-6xl px-5 pb-24 pt-10 sm:px-8"><div className="grid overflow-hidden rounded-[3rem] bg-white shadow-xl lg:grid-cols-[1fr_.9fr]"><div className="p-7 sm:p-12"><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">Zanim wpadniesz</span><h2 className="mt-3 text-4xl font-black tracking-tight">Zaplanuj miękkie lądowanie.</h2><div className="mt-9 space-y-5"><InfoRow icon={Clock3} title="Wt–Pt 11:00–20:00 · Sob–Nd 10:00–20:00" text="W poniedziałki lokal jest zamknięty — to dzień ciszy dla kotów."/><InfoRow icon={MapPin} title="ul. Krakowska 32, 45-075 Opole" text="5 minut spacerem od opolskiego Rynku · adres koncepcyjny."/><InfoRow icon={CalendarDays} title="Stoliki na 90 minut" text="W weekend rezerwacja zalecana. Dzieci od 8 lat, zawsze pod opieką dorosłego."/></div><div className="mt-9 flex flex-wrap gap-3"><button onClick={() => setBookingOpen(true)} className="flex items-center gap-2 rounded-full bg-sky-500 px-6 py-3.5 font-bold text-white transition hover:-translate-y-1 hover:bg-sky-600">Zarezerwuj stolik <CalendarDays size={18}/></button><button onClick={() => setChatOpen(true)} className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">Zapytaj asystenta <MessageCircle size={18}/></button><a href="https://www.openstreetmap.org/search?query=Krakowska%2032%20Opole" target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">Pokaż mapę <MapPin size={18}/></a></div></div><div className="relative min-h-[380px]"><img src="https://images.unsplash.com/photo-1511081692775-05d0f180a065?q=85&w=1200&auto=format&fit=crop" alt="Przytulne wnętrze kawiarni" loading="lazy" className="absolute inset-0 h-full w-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 to-transparent"/></div></div></section>
       <section id="support" className="bg-slate-950 py-24 text-white"><div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="grid gap-12 lg:grid-cols-[.9fr_1.1fr] lg:items-end"><div><span className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-[.2em] text-sky-400"><HeartHandshake size={17}/> Dla naszych kotów</span><h2 className="mt-4 text-4xl font-black leading-tight tracking-tight sm:text-5xl">Mały gest.<br/>Dużo spokoju.</h2><p className="mt-5 max-w-md text-lg leading-relaxed text-slate-300">Opieka weterynaryjna, karma i spokojne kryjówki są ważniejsze niż kolejna zabawka. Wybierz sposób, w jaki chcesz dołożyć swoją cegiełkę.</p><button type="button" onClick={() => setSupportOpen(true)} className="mt-8 inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3.5 font-extrabold text-amber-950 transition hover:-translate-y-1 hover:bg-amber-200">Wesprzyj koty <HeartHandshake size={18}/></button></div><div className="grid gap-3 sm:grid-cols-3">{[['Wirtualna kawa','15 zł','na codzienną opiekę'],['Miska na dziś','35 zł','na karmę i żwirek'],['Wsparcie leczenia','100 zł','na badania i wizyty']].map(([title, amount, text]) => <button key={title} type="button" onClick={() => setSupportOpen(true)} className="rounded-3xl border border-white/10 bg-white/10 p-5 text-left transition hover:-translate-y-1 hover:bg-white/15"><Coffee className="text-amber-300" size={20}/><p className="mt-6 text-sm font-bold text-slate-300">{title}</p><p className="mt-1 text-3xl font-black">{amount}</p><p className="mt-2 text-xs leading-relaxed text-slate-400">{text}</p></button>)}</div></div><div className="mt-12 grid gap-5 rounded-[2.5rem] bg-white p-7 text-slate-950 sm:p-9 lg:grid-cols-[.8fr_1.2fr] lg:items-center"><div><p className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-[.18em] text-sky-600"><ShoppingBasket size={17}/> Lista potrzeb</p><h3 className="mt-3 text-3xl font-black">Co przyda się najbardziej?</h3><p className="mt-3 leading-relaxed text-slate-600">Rzeczy można przynieść po wcześniejszym kontakcie z obsługą. Najpierw sprawdzimy, czego aktualnie potrzebują koty.</p></div><ul className="grid gap-2 sm:grid-cols-2">{['mokra karma dobrej jakości','żwirek bentonitowy bez zapachu','polarowe koce i ręczniki','transportery w dobrym stanie','preparaty na pchły i kleszcze','środki do bezpiecznego sprzątania'].map((item) => <li key={item} className="flex items-center gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm font-bold text-slate-700"><Check size={16} className="shrink-0 text-emerald-500"/>{item}</li>)}</ul></div></div></section>
       <section id="events" className="bg-sky-50 py-24"><div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="mb-12 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">W kalendarzu kociej kawiarni</span><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Wydarzenia, na które chce się wracać.</h2></div><p className="max-w-md text-slate-600">Małe spotkania w spokojnym rytmie. Liczba miejsc jest ograniczona, dlatego warto zapisać się wcześniej.</p></div><div className="grid gap-4 md:grid-cols-2">{events.map(({ icon: Icon, tag, title, text, meta }) => <article key={title} className="group rounded-[2rem] border border-sky-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-7"><div className="flex items-start justify-between gap-4"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-100 text-sky-600"><Icon size={22}/></span><span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-extrabold text-amber-800">{tag}</span></div><h3 className="mt-6 text-2xl font-black">{title}</h3><p className="mt-3 min-h-12 text-sm leading-relaxed text-slate-600">{text}</p><div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"><span className="text-xs font-extrabold text-slate-500">{meta}</span><button type="button" onClick={() => setBookingOpen(true)} className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-sky-600">Zapisz się <ArrowRight size={15}/></button></div></article>)}</div></div></section>
 
@@ -266,4 +161,6 @@ export default function App() {
   </div>;
 }
 
-function Info({ icon: Icon, title, text }) { return <div className="flex gap-4"><Icon className="mt-1 shrink-0 text-sky-500"/><div><p className="font-extrabold">{title}</p><p className="text-sm text-slate-500">{text}</p></div></div>; }
+
+
+

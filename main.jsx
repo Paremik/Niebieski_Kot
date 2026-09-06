@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import MenuPage from './MenuPage.jsx'
-import CatProfilePage, { catProfiles } from './CatProfilePage.jsx'
+import App from './src/pages/HomePage.jsx'
+import MenuPage from './src/pages/MenuPage.jsx'
+import CatProfilePage, { catProfiles } from './src/pages/CatProfilePage.jsx'
 import AdminPage from './AdminPage.jsx'
 import './styles.css'
 
@@ -47,3 +47,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     {isCatPage ? <CatProfilePage slug={catSlug}/> : <Page />}
   </React.StrictMode>,
 )
+
