@@ -8,12 +8,13 @@ import './styles.css'
 const searchParams = new URLSearchParams(window.location.search)
 const legacyMenuUrl = searchParams.get('page') === 'menu'
 const legacyCatSlug = searchParams.get('cat')
-const pathCatSlug = window.location.pathname.match(/^\/koty\/([^/]+)$/)?.[1]
+const normalizedPath = window.location.pathname.replace(/\/+$/, '') || '/'
+const pathCatSlug = normalizedPath.match(/^\/koty\/([^/]+)$/)?.[1]
 const catSlug = catProfiles[pathCatSlug] ? pathCatSlug : catProfiles[legacyCatSlug] ? legacyCatSlug : null
-const isMenuPage = window.location.pathname === '/menu' || legacyMenuUrl
+const isMenuPage = normalizedPath === '/menu' || legacyMenuUrl
 const isCatPage = Boolean(catSlug)
-if (legacyMenuUrl && window.location.pathname !== '/menu') window.history.replaceState({}, '', '/menu')
-if (legacyCatSlug && catSlug && window.location.pathname !== `/koty/${catSlug}`) window.history.replaceState({}, '', `/koty/${catSlug}`)
+if (legacyMenuUrl && normalizedPath !== '/menu') window.history.replaceState({}, '', '/menu')
+if (legacyCatSlug && catSlug && normalizedPath !== `/koty/${catSlug}`) window.history.replaceState({}, '', `/koty/${catSlug}`)
 const Page = isMenuPage ? MenuPage : App
 const pageMeta = isCatPage ? {
   title: `${catProfiles[catSlug].name} — profil kota | Niebieski Kot`,
