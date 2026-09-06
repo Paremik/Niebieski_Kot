@@ -2,21 +2,23 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import MenuPage from './MenuPage.jsx'
-import CatProfilePage from './CatProfilePage.jsx'
+import CatProfilePage, { catProfiles } from './CatProfilePage.jsx'
 import './styles.css'
 
 const searchParams = new URLSearchParams(window.location.search)
 const legacyMenuUrl = searchParams.get('page') === 'menu'
-const legacyPixelUrl = searchParams.get('cat') === 'pixel'
+const legacyCatSlug = searchParams.get('cat')
+const pathCatSlug = window.location.pathname.match(/^\/koty\/([^/]+)$/)?.[1]
+const catSlug = catProfiles[pathCatSlug] ? pathCatSlug : catProfiles[legacyCatSlug] ? legacyCatSlug : null
 const isMenuPage = window.location.pathname === '/menu' || legacyMenuUrl
-const isPixelPage = window.location.pathname === '/koty/pixel' || legacyPixelUrl
+const isCatPage = Boolean(catSlug)
 if (legacyMenuUrl && window.location.pathname !== '/menu') window.history.replaceState({}, '', '/menu')
-if (legacyPixelUrl && window.location.pathname !== '/koty/pixel') window.history.replaceState({}, '', '/koty/pixel')
-const Page = isPixelPage ? CatProfilePage : isMenuPage ? MenuPage : App
-const pageMeta = isPixelPage ? {
-  title: 'Pixel — kot do adopcji | Niebieski Kot',
-  description: 'Poznaj Pixela: jego historię, charakter, zdrowie, ulubione zabawy i wymarzony dom.',
-  url: 'https://niebieski-kot.vercel.app/koty/pixel',
+if (legacyCatSlug && catSlug && window.location.pathname !== `/koty/${catSlug}`) window.history.replaceState({}, '', `/koty/${catSlug}`)
+const Page = isMenuPage ? MenuPage : App
+const pageMeta = isCatPage ? {
+  title: `${catProfiles[catSlug].name} — profil kota | Niebieski Kot`,
+  description: catProfiles[catSlug].seoDescription,
+  url: `https://niebieski-kot.vercel.app/koty/${catSlug}`,
 } : isMenuPage ? {
   title: 'Menu | Niebieski Kot',
   description: 'Kawy specialty, śniadania, lekkie dania i domowe słodkości w kociej kawiarni Niebieski Kot.',
@@ -35,6 +37,6 @@ document.querySelector('meta[property="og:url"]')?.setAttribute('content', pageM
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Page />
+    {isCatPage ? <CatProfilePage slug={catSlug}/> : <Page />}
   </React.StrictMode>,
 )
