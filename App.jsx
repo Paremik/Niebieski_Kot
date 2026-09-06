@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, CalendarDays, Cat, Check, ChevronLeft, ChevronRight, Clock3, Coffee, Heart, HeartHandshake, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, ShoppingBasket, X } from 'lucide-react';
+import { ArrowRight, CalendarDays, Cat, Check, ChevronLeft, ChevronRight, Clock3, Coffee, Globe2, Heart, HeartHandshake, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, ShoppingBasket, X } from 'lucide-react';
 import BookingModal from './BookingModal.jsx';
 import SupportModal from './SupportModal.jsx';
 
@@ -28,6 +28,11 @@ const events = [
   { icon: Cat, tag: 'Две субботы в месяц', title: 'Чтения и мастер-классы', text: 'Истории о животных, творческие занятия и спокойный формат для всей семьи.', meta: '12:00 · 75 минут · от 20 zł' },
   { icon: PawPrint, tag: 'Первое воскресенье месяца', title: 'День усыновления', text: 'Знакомство с котами, консультации волонтёров и помощь в подготовке к ответственному дому.', meta: 'Без входного взноса · регистрация обязательна' },
 ];
+const languageCopy = {
+  pl: { nav: ['O nas', 'Koty', 'Menu', 'Zasady', 'Wydarzenia', 'Wesprzyj', 'Wizyta'], ask: 'Zapytaj nas', booking: 'Zarezerwuj stolik', cats: 'Poznaj koty', eyebrow: 'Kocia kawiarnia · Opole', hero: 'Zwolnij. Kawa stygnie, koty nie.', intro: 'Spokojne miejsce na dobrą kawę, miękki fotel i spotkanie z kotami, które naprawdę nadają temu miejscu rytm.' },
+  ru: { nav: ['О нас', 'Коты', 'Меню', 'Правила', 'События', 'Поддержать', 'Визит'], ask: 'Спросить нас', booking: 'Забронировать столик', cats: 'Познакомиться с котами', eyebrow: 'Котокафе · Ополе', hero: 'Замедлись. Кофе остывает, коты — нет.', intro: 'Уютное место для хорошего кофе, мягкого кресла и встречи с котами, которые задают этому месту свой ритм.' },
+  en: { nav: ['About', 'Cats', 'Menu', 'Rules', 'Events', 'Support', 'Visit'], ask: 'Ask us', booking: 'Book a table', cats: 'Meet the cats', eyebrow: 'Cat café · Opole', hero: 'Slow down. Coffee cools, cats don’t.', intro: 'A calm place for good coffee, a soft chair and time with cats who give this café its own rhythm.' },
+};
 const menuSlides = [
   { image: '/images/menu-latte.webp', alt: 'Kocie latte z maślanym ciasteczkiem', label: 'Kocie latte' },
   { image: '/images/menu-toast.webp', alt: 'Grzanka z kozim serem i pieczonym burakiem', label: 'Grzanka z kozim serem' },
@@ -42,6 +47,7 @@ export default function App() {
   const [menuSlide, setMenuSlide] = useState(0);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
+  const [language, setLanguage] = useState(() => window.localStorage.getItem('niebieski-kot-language') || 'pl');
   const [messages, setMessages] = useState([{ role: 'assistant', content: 'Cześć! 🐾 Zapytaj mnie o godziny, zasady, menu albo naszych rezydentów.' }]);
   const scrollRef = useRef(null);
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages, chatOpen]);
@@ -52,6 +58,8 @@ export default function App() {
   }, []);
   const closeBooking = useCallback(() => setBookingOpen(false), []);
   const closeSupport = useCallback(() => setSupportOpen(false), []);
+  const copy = languageCopy[language] || languageCopy.pl;
+  const changeLanguage = (nextLanguage) => { setLanguage(nextLanguage); window.localStorage.setItem('niebieski-kot-language', nextLanguage); document.documentElement.lang = nextLanguage; };
   const scrollTo = (id) => { setMobileMenu(false); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); };
   const warsawNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Warsaw' }));
   const day = warsawNow.getDay();
@@ -70,14 +78,14 @@ export default function App() {
       setMessages((m) => [...m, { role: 'assistant', content: reply }]); setLoading(false);
     }, 650);
   };
-  const links = [['about', 'O nas'], ['cats', 'Koty'], ['menu', 'Menu'], ['rules', 'Zasady'], ['events', 'События'], ['support', 'Wesprzyj'], ['visit', 'Wizyta']];
+  const links = [['about', copy.nav[0]], ['cats', copy.nav[1]], ['menu', copy.nav[2]], ['rules', copy.nav[3]], ['events', copy.nav[4]], ['support', copy.nav[5]], ['visit', copy.nav[6]]];
 
   return <div className="min-h-screen overflow-x-hidden bg-[#f7f8f4] text-slate-950 selection:bg-sky-200">
     <nav className="fixed inset-x-0 top-0 z-40 border-b border-white/50 bg-[#f7f8f4]/85 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8">
         <button onClick={() => scrollTo('top')} className="flex items-center gap-2.5"><span className="grid h-9 w-9 place-items-center rounded-full bg-sky-500 text-white"><Cat size={19}/></span><span className="text-lg font-extrabold tracking-tight">Niebieski Kot<span className="text-sky-500">.</span></span></button>
         <div className="hidden items-center gap-7 md:flex">{links.map(([id,label]) => id === 'menu' ? <a key={id} href="/menu" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">{label}</a> : <button key={id} onClick={() => scrollTo(id)} className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">{label}</button>)}</div>
-        <button onClick={() => setChatOpen(true)} className="hidden items-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-sky-600 md:flex">Zapytaj nas <ArrowRight size={15}/></button>
+        <div className="flex items-center gap-2"><label className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/70 px-3 py-2 text-xs font-bold text-slate-600"><Globe2 size={15} className="text-sky-500"/><span className="sr-only">Выбрать язык</span><select value={language} onChange={(event) => changeLanguage(event.target.value)} aria-label="Выбрать язык" className="cursor-pointer bg-transparent outline-none"><option value="pl">PL</option><option value="ru">RU</option><option value="en">EN</option></select></label><button onClick={() => setChatOpen(true)} className="hidden items-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-sky-600 md:flex">{copy.ask} <ArrowRight size={15}/></button></div>
         <button onClick={() => setMobileMenu(!mobileMenu)} className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 md:hidden" aria-label="Menu">{mobileMenu ? <X/> : <Menu/>}</button>
       </div>
       {mobileMenu && <div className="border-t border-slate-200 bg-[#f7f8f4] px-5 py-5 md:hidden">{links.map(([id,label]) => id === 'menu' ? <a key={id} href="/menu" className="block w-full border-b border-slate-200 py-3 text-left font-bold">{label}</a> : <button key={id} onClick={() => scrollTo(id)} className="block w-full border-b border-slate-200 py-3 text-left font-bold">{label}</button>)}</div>}
@@ -87,10 +95,10 @@ export default function App() {
       <header className="mx-auto grid min-h-[780px] max-w-6xl items-center gap-12 px-5 pb-20 pt-32 sm:px-8 lg:grid-cols-[1.05fr_.95fr]">
         <div className="relative z-10">
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3.5 py-2 text-xs font-extrabold uppercase tracking-[.16em] text-sky-700 shadow-sm"><span className={`h-2 w-2 rounded-full ${isOpen ? 'animate-pulse bg-emerald-500' : 'bg-slate-400'}`}/>{isOpen ? 'Otwarte teraz · do 20:00' : day === 1 ? 'Poniedziałek · koty odpoczywają' : 'Dziś od 11:00'}</div>
-          <p className="mb-4 text-sm font-extrabold uppercase tracking-[.22em] text-sky-600">Kocia kawiarnia · Opole</p>
-          <h1 className="text-5xl font-black leading-[.98] tracking-[-.045em] sm:text-7xl lg:text-[5.25rem]">Zwolnij.<br/>Kawa stygnie,<br/><span className="text-sky-500">koty nie.</span></h1>
-          <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-600">Spokojne miejsce na dobrą kawę, miękki fotel i spotkanie z kotami, które naprawdę nadają temu miejscu rytm.</p>
-          <div className="mt-9 flex flex-wrap gap-3"><button onClick={() => setBookingOpen(true)} className="flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 font-bold text-white shadow-xl transition hover:-translate-y-1 hover:bg-sky-600">Zarezerwuj stolik <ArrowRight size={18}/></button><button onClick={() => scrollTo('cats')} className="rounded-full border border-slate-300 bg-white px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">Poznaj koty</button></div>
+          <p className="mb-4 text-sm font-extrabold uppercase tracking-[.22em] text-sky-600">{copy.eyebrow}</p>
+          <h1 className="text-5xl font-black leading-[.98] tracking-[-.045em] sm:text-7xl lg:text-[5.25rem]">{copy.hero}</h1>
+          <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-600">{copy.intro}</p>
+          <div className="mt-9 flex flex-wrap gap-3"><button onClick={() => setBookingOpen(true)} className="flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 font-bold text-white shadow-xl transition hover:-translate-y-1 hover:bg-sky-600">{copy.booking} <ArrowRight size={18}/></button><button onClick={() => scrollTo('cats')} className="rounded-full border border-slate-300 bg-white px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">{copy.cats}</button></div>
           <div className="mt-12 flex flex-wrap gap-7 text-sm font-semibold text-slate-500"><span className="flex items-center gap-2"><Heart size={17} className="text-sky-500"/> Wspieramy adopcje</span><span className="flex items-center gap-2"><Coffee size={17} className="text-sky-500"/> Specialty coffee</span></div>
         </div>
         <div className="relative mx-auto w-full max-w-[520px]"><div className="absolute -left-8 -top-8 h-40 w-40 rounded-full bg-sky-200/60 blur-2xl"/><div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] bg-sky-100 shadow-2xl"><img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=85&w=1200&auto=format&fit=crop" alt="Kot odpoczywający w kawiarni" className="h-full w-full object-cover"/><div className="absolute inset-x-5 bottom-5 rounded-3xl border border-white/40 bg-white/80 p-5 backdrop-blur-xl"><div className="flex items-center gap-4"><span className="grid h-11 w-11 place-items-center rounded-full bg-sky-500 text-white"><PawPrint size={21}/></span><div><p className="font-extrabold">Tu kot wybiera Ciebie</p><p className="text-sm text-slate-600">Usiądź wygodnie i daj mu chwilę.</p></div></div></div></div><div className="absolute -right-4 top-16 rotate-6 rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black shadow-lg sm:-right-8">zero pośpiechu ✦</div></div>
