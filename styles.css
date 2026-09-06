@@ -11,3 +11,14 @@
   .field-input, .admin-input { @apply mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-200; }
   .admin-label { @apply text-sm font-extrabold text-slate-700; }
 }
+
+main#top > header { order: 1; }
+main#top > #about { order: 2; }
+main#top > #cats { order: 3; }
+main#top > #cat-of-day { order: 4; }
+main#top > #menu { order: 5; }
+main#top > #rules { order: 6; }
+main#top > #visit { order: 7; }
+main#top > #support { order: 8; }
+main#top > #events { order: 9; }
+main#top > section:last-child { order: 4; }

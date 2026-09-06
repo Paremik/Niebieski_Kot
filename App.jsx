@@ -45,6 +45,7 @@ const pageCopy = {
   },
 };
 const domTranslations = {
+  pl: { 'Открыть профиль': 'Otwórz profil' },
   ru: {
     'zero pośpiechu ✦': 'никакой спешки ✦', 'Wspieramy adopcje': 'Помогаем усыновлению', 'Specialty coffee': 'Авторский кофе', 'Nasza idea': 'Наша идея', 'Dobre rzeczy dzieją się wolniej.': 'Хорошие вещи происходят медленнее.', 'Tworzymy kameralną kawiarnię, w której dobrostan kotów jest równie ważny jak smak espresso.': 'Мы создаём камерное кафе, где благополучие котов так же важно, как вкус эспрессо.', 'Każdy rezydent ma własną historię, charakter i przestrzeń. Ty dostajesz chwilę oddechu — on wybór, czy chce dołączyć.': 'У каждого жителя своя история, характер и пространство. Ты получаешь передышку, а кот сам выбирает контакт.', 'Nasi gospodarze': 'Наши хозяева', 'Poznaj ekipę.': 'Познакомься с командой.', 'Każdy inny. Każdy u siebie. Pixel szuka domu, Luna i Mochi są stałymi gospodarzami.': 'Все разные и каждый у себя дома. Пиксель ищет дом, Луна и Мочи — постоянные жители.', 'Jedzenie i napoje': 'Еда и напитки', 'Kocia karta ma własne miejsce.': 'У котокафе есть своё меню.', 'Kawy specialty, śniadania, lekkie dania i domowe słodkości — teraz w przejrzystym menu z cenami.': 'Авторский кофе, завтраки, лёгкие блюда и домашние десерты — всё с понятными ценами.', 'Otwórz pełne menu': 'Открыть меню', 'Koci savoir-vivre': 'Кошачьи правила', 'Kilka zasad.': 'Несколько правил.', 'Dużo spokoju.': 'Много спокойствия.', 'To dom naszych rezydentów. Proste reguły sprawiają, że wszystkim — na dwóch i czterech łapach — jest tu dobrze.': 'Это дом наших жителей. Простые правила помогают хорошо себя чувствовать и людям, и котам.', 'FAQ pierwszej wizyty': 'FAQ первого визита', 'Dobrze wiedzieć przed przyjściem.': 'Что важно знать заранее.', 'Zanim wpadniesz': 'Перед визитом', 'Zaplanuj miękkie lądowanie.': 'Запланируй мягкую посадку.', 'Zarezerwuj stolik': 'Забронировать столик', 'Zapytaj asystenta': 'Спросить ассистента', 'Pokaż mapę': 'Открыть карту', 'Dla naszych kotów': 'Для наших котов', 'Mały gest.': 'Маленький жест.', 'Dużo spokoju.': 'Большое спокойствие.', 'Wesprzyj koty': 'Поддержать котов', 'Lista potrzeb': 'Список нужд', 'Co przyda się najbardziej?': 'Что сейчас нужнее всего?', 'W kalendarzu kociej kawiarni': 'В календаре котокафе', 'Wydarzenia, na które chce się wracać.': 'События, ради которых хочется вернуться.', 'Zapisz się': 'Записаться', 'Czy można przyjść z dziećmi?': 'Можно ли прийти с детьми?', 'Czy można przynieść własne jedzenie?': 'Можно ли принести свою еду?', 'Czy trzeba rezerwować miejsce?': 'Нужно ли бронировать место?', 'Joga z kotami': 'Йога с котами', 'Wieczór gier planszowych': 'Вечер настольных игр', 'Czytania i warsztaty': 'Чтения и мастер-классы', 'Dzień adopcji': 'День усыновления'
   },
@@ -73,7 +74,7 @@ const menuSlides = [
   { image: '/images/menu-toast.webp', alt: 'Grzanka z kozim serem i pieczonym burakiem', label: 'Grzanka z kozim serem' },
   { image: '/images/menu-cheesecake.webp', alt: 'Sernik baskijski z owocami i matchą', label: 'Sernik baskijski' },
 ];
-const catOfDay = { name: 'Pixel', slug: 'pixel', mood: 'Готов к знакомству', activity: 'Сегодня охотится за игрушечной мышкой и ищет человека, который подарит ему немного спокойного внимания.', image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=88&w=1200&auto=format&fit=crop' };
+const catOfDay = { name: 'Pixel', slug: 'pixel', mood: 'Gotowy na spotkanie', activity: 'Dziś poluje na zabawkową myszkę i szuka osoby, która podaruje mu chwilę spokojnej uwagi.', image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?q=88&w=1200&auto=format&fit=crop' };
 
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
@@ -148,7 +149,7 @@ export default function App() {
       {mobileMenu && <div className="border-t border-slate-200 bg-[#f7f8f4] px-5 py-5 md:hidden">{links.map(([id,label]) => id === 'menu' ? <a key={id} href="/menu" className="block w-full border-b border-slate-200 py-3 text-left font-bold">{label}</a> : <button key={id} onClick={() => scrollTo(id)} className="block w-full border-b border-slate-200 py-3 text-left font-bold">{label}</button>)}</div>}
     </nav>
 
-    <main id="top">
+    <main id="top" className="flex flex-col">
       <header className="mx-auto grid min-h-[780px] max-w-6xl items-center gap-12 px-5 pb-20 pt-32 sm:px-8 lg:grid-cols-[1.05fr_.95fr]">
         <div className="relative z-10">
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3.5 py-2 text-xs font-extrabold uppercase tracking-[.16em] text-sky-700 shadow-sm"><span className={`h-2 w-2 rounded-full ${isOpen ? 'animate-pulse bg-emerald-500' : 'bg-slate-400'}`}/>{isOpen ? page.open : day === 1 ? page.monday : page.today}</div>
