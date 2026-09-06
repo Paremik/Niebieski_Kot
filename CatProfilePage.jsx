@@ -107,6 +107,13 @@ export default function CatProfilePage({ slug = 'pixel' }) {
   const language = getLanguage();
   const baseCat = catProfiles[slug] ?? catProfiles.pixel;
   const cat = { ...baseCat, ...(profileData[language]?.[slug] || {}) };
+  const birthYear = baseCat.birth.match(/\d{4}/)?.[0] || '';
+  if (language === 'en') cat.birth = `born around ${birthYear}`;
+  if (language === 'ru') cat.birth = `родился или родилась примерно в ${birthYear} году`;
+  if (language === 'en') cat.joined = cat.joined.replace('lutego', 'February').replace('czerwca', 'June').replace('października', 'October');
+  if (language === 'ru') cat.joined = cat.joined.replace('lutego', 'февраля').replace('czerwca', 'июня').replace('października', 'октября');
+  if (language === 'en') cat.traits = cat.traits.map((trait) => ({ ...trait, label: { ciekawość: 'curiosity', zabawa: 'playfulness', bliskość: 'closeness', przytulanie: 'cuddles' }[trait.label] || trait.label }));
+  if (language === 'ru') cat.traits = cat.traits.map((trait) => ({ ...trait, label: { ciekawość: 'любопытство', zabawa: 'игры', bliskość: 'близость', przytulanie: 'объятия' }[trait.label] || trait.label }));
   if (language === 'en') {
     cat.health = ['core vaccinations up to date', 'regularly dewormed', 'neutered', 'microchipped', 'FIV/FeLV tests negative'];
     cat.story = [`${cat.name} came to Niebieski Kot through a local rescue network. The team gave them a calm introduction and a safe place to rest.`, `After a short settling-in period, ${cat.name} chose a favourite spot in the café and began meeting guests at their own pace.`, 'Their age is an estimate based on veterinary records and an initial examination.'];
@@ -120,10 +127,10 @@ export default function CatProfilePage({ slug = 'pixel' }) {
   const ui = profileUi[language] || { resident: 'Poznaj naszego rezydenta', age: 'Wiek', joined: 'Z nami od', health: 'Zdrowie', status: 'Status', healthTitle: 'Karta weterynaryjna', character: 'Charakter', signal: 'Sygnał „mam dość”:', likes: 'Co kocha', respect: 'Co warto uszanować', day: 'Typowy dzień', concept: 'To element projektu koncepcyjnego.' };
   useEffect(() => { document.documentElement.lang = language; }, [language]);
   const facts = [
-    { icon: CalendarDays, label: 'Wiek', value: cat.age, note: cat.birth },
-    { icon: Home, label: 'Z nami od', value: cat.joined, note: cat.origin },
-    { icon: Stethoscope, label: 'Zdrowie', value: cat.healthStatus, note: cat.healthNote },
-    { icon: Heart, label: 'Status', value: cat.status, note: cat.statusNote },
+    { icon: CalendarDays, label: ui.age, value: cat.age, note: cat.birth },
+    { icon: Home, label: ui.joined, value: cat.joined, note: cat.origin },
+    { icon: Stethoscope, label: ui.health, value: cat.healthStatus, note: cat.healthNote },
+    { icon: Heart, label: ui.status, value: cat.status, note: cat.statusNote },
   ];
 
   return <div className="min-h-screen bg-[#f7f8f4] text-slate-950 selection:bg-sky-200">
@@ -140,7 +147,7 @@ export default function CatProfilePage({ slug = 'pixel' }) {
       <section className="mx-auto grid max-w-6xl gap-5 px-5 pb-20 sm:px-8 lg:grid-cols-2"><ListCard title={ui.likes} intro={language === "ru" ? "Эти вещи почти всегда поднимают настроение." : language === "en" ? "These things almost always improve their mood." : "Te rzeczy prawie zawsze poprawiają humor."} items={cat.likes} tone="amber"/><ListCard title={ui.respect} intro={language === "ru" ? "Несколько простых правил помогают чувствовать себя в безопасности." : language === "en" ? "A few simple rules help them feel safe." : "Kilka prostych zasad pomaga czuć się bezpiecznie."} items={cat.boundaries} tone="slate"/></section>
       <section className="mx-auto max-w-6xl px-5 pb-20 sm:px-8"><div className="grid gap-10 rounded-[3rem] border border-slate-200 bg-white p-7 sm:p-10 lg:grid-cols-[.8fr_1.2fr]"><div><p className="text-sm font-extrabold uppercase tracking-[.18em] text-sky-600">{ui.day}</p><h2 className="mt-3 text-4xl font-black tracking-tight">{cat.routineTitle}</h2><p className="mt-4 leading-relaxed text-slate-600">{cat.routineIntro}</p></div><div className="space-y-4">{cat.routine.map(([time, text]) => <Routine key={time} time={time} text={text}/>)}</div></div></section>
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8"><div className="overflow-hidden rounded-[3rem] bg-amber-300 p-8 sm:p-12"><div className="grid gap-8 lg:grid-cols-[1fr_.75fr] lg:items-end"><div><p className="text-sm font-extrabold uppercase tracking-[.18em] text-amber-900">{cat.placeLabel}</p><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{cat.placeTitle}</h2><p className="mt-5 max-w-2xl leading-relaxed text-amber-950/75">{cat.placeText}</p></div><div className="rounded-3xl bg-white/65 p-5"><p className="flex items-center gap-2 font-black"><ShieldCheck size={19}/> {cat.sideTitle}</p><p className="mt-2 text-sm leading-relaxed text-amber-950/70">{cat.sideText}</p></div></div></div></section>
-      <p className="mx-auto max-w-2xl px-5 pb-10 text-center text-xs leading-relaxed text-slate-500">{cat.name}, historia i dane zdrowotne są elementem projektu koncepcyjnego. Nie opisują prawdziwego zwierzęcia ani rzeczywistej dokumentacji weterynaryjnej.</p>
+      <p className="mx-auto max-w-2xl px-5 pb-10 text-center text-xs leading-relaxed text-slate-500">{cat.name} · {ui.concept}</p>
     </main>
   </div>;
 }
@@ -148,4 +155,5 @@ export default function CatProfilePage({ slug = 'pixel' }) {
 function Trait({ value, label }) { return <div className="rounded-2xl bg-white/15 p-3 ring-1 ring-white/20"><strong className="block text-xl">{value}</strong><span className="text-xs text-sky-100">{label}</span></div>; }
 function ListCard({ title, intro, items, tone }) { const warm = tone === 'amber'; return <article className={`rounded-[2.5rem] p-7 sm:p-9 ${warm ? 'bg-amber-100' : 'bg-slate-200'}`}><h2 className="text-3xl font-black">{title}</h2><p className="mt-3 text-slate-600">{intro}</p><ul className="mt-6 flex flex-wrap gap-2">{items.map((item) => <li key={item} className={`rounded-full px-4 py-2 text-sm font-bold ${warm ? 'bg-white text-amber-950' : 'bg-white text-slate-800'}`}>{item}</li>)}</ul></article>; }
 function Routine({ time, text }) { return <div className="flex gap-4 rounded-2xl bg-slate-50 p-4"><span className="flex shrink-0 items-center gap-2 font-black text-sky-600"><Clock3 size={17}/>{time}</span><p className="text-sm leading-relaxed text-slate-600">{text}</p></div>; }
+
 
