@@ -21,6 +21,31 @@ const pageCopy = {
     open: 'Open now · until 20:00', monday: 'Monday · cats are resting', today: 'Today from 11:00', adopt: 'We support adoption', coffee: 'Specialty coffee', homeTitle: 'Here, the cat chooses you', homeText: 'Make yourself comfortable and give them a moment.', aboutLabel: 'Our idea', aboutTitle: 'Good things happen more slowly.', aboutOne: 'We are creating an intimate café where cat wellbeing matters as much as the taste of espresso.', aboutTwo: 'Every resident has a story, personality and space. You get a moment to breathe — they get the choice to connect.', catsLabel: 'Our hosts', catsTitle: 'Meet the team.', catsText: 'Each one is different and at home here. Pixel is looking for a home; Luna and Mochi are resident hosts.', menuLabel: 'Food and drinks', menuTitle: 'The cat café has its own menu.', menuText: 'Specialty coffee, breakfast, light dishes and homemade sweets — all with clear prices.', menuButton: 'Open full menu', rulesLabel: 'Cat etiquette', rulesTitle: 'A few rules. Lots of calm.', rulesText: 'This is our residents’ home. Simple rules help everyone — on two and four legs — feel comfortable.', faqLabel: 'First visit FAQ', faqTitle: 'Good to know before you come.', visitLabel: 'Before you visit', visitTitle: 'Plan a soft landing.', book: 'Book a table', ask: 'Ask the assistant', map: 'Show map', supportLabel: 'For our cats', supportTitle: 'A small gesture. A lot of calm.', supportText: 'Veterinary care, food and quiet hideaways matter more than another toy. Choose how you would like to help.', supportButton: 'Support the cats', needsLabel: 'Wish list', needsTitle: 'What helps most?', needsText: 'Please contact the team before bringing items so we can confirm what the cats need right now.', eventsLabel: 'In the cat café calendar', eventsTitle: 'Events worth coming back for.', eventsText: 'Small gatherings at a calm pace. Places are limited, so early registration is recommended.', eventsButton: 'Sign up'
   },
 };
+const catTranslations = {
+  pl: {},
+  ru: {
+    luna: { linkLabel: 'Познакомиться с Луной', note: '4 года · спокойная наблюдательница', story: 'Она попала к нам после переезда своих хозяев. Больше всего любит сидеть у окна и сама выбирает момент для ласки.' },
+    mochi: { linkLabel: 'Познакомиться с Мочи', note: '6 лет · мастер сна', story: 'Мягкий кот, найденный на дачных участках. Любит тёплые пледы, спокойные разговоры и людей с книгой на коленях.' },
+    pixel: { linkLabel: 'Познакомиться с Пикселем', note: '2 года · первым готов играть', story: 'Самый младший в команде и кандидат на усыновление. Замечает удочку из другого конца комнаты, а потом засыпает под столом.' },
+  },
+  en: {
+    luna: { linkLabel: 'Meet Luna', note: '4 years · quiet observer', story: 'She came to us after her guardians moved. She loves sitting by the window and chooses the moment for affection herself.' },
+    mochi: { linkLabel: 'Meet Mochi', note: '6 years · nap champion', story: 'A gentle tomcat found near allotments. He loves soft blankets, quiet conversations and people reading with a book on their lap.' },
+    pixel: { linkLabel: 'Meet Pixel', note: '2 years · first to play', story: 'The youngest of the group and looking for a home. He spots a toy wand from across the room, then falls asleep under the table.' },
+  },
+};
+const contentTranslations = {
+  pl: {},
+  ru: {
+    'Każda niedziela': 'Каждое воскресенье', 'Każdy piątek': 'Каждую пятницу', 'Dwie soboty w miesiącu': 'Две субботы в месяц', 'Pierwsza niedziela miesiąca': 'Первое воскресенье месяца',
+    'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.': 'Мягкая практика для начинающих, спокойная музыка и коты, гуляющие по залу.', 'Małe grupy, przytulne gry i gorący napój z naszej karty.': 'Небольшие компании, уютные игры и горячий напиток из нашего меню.', 'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.': 'Истории о животных, творческие занятия и спокойный формат для всей семьи.', 'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.': 'Познакомьтесь с нашими котами, поговорите с волонтёрами и подготовьтесь к ответственному усыновлению.', 'Wstęp wolny · obowiązują zapisy': 'Вход свободный · нужна запись', 'Gotowy na spotkanie': 'Готов к встрече',
+  },
+  en: {
+    'Każda niedziela': 'Every Sunday', 'Każdy piątek': 'Every Friday', 'Dwie soboty w miesiącu': 'Two Saturdays each month', 'Pierwsza niedziela miesiąca': 'First Sunday of the month',
+    'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.': 'A gentle practice for beginners, calm music and cats wandering around the room.', 'Małe grupy, przytulne gry i gorący napój z naszej karty.': 'Small groups, cosy games and a hot drink from our menu.', 'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.': 'Animal stories, creative activities and a calm format for the whole family.', 'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.': 'Meet our cats, talk with volunteers and prepare for responsible adoption.', 'Wstęp wolny · obowiązują zapisy': 'Free entry · registration required', 'Gotowy na spotkanie': 'Ready to meet',
+  },
+};
+const blockTranslations = { pl: {}, ru: {}, en: {} };
 const domTranslations = {
   pl: { 'Открыть профиль': 'Otwórz profil' },
   ru: {
