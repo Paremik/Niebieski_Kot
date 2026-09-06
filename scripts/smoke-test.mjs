@@ -9,9 +9,10 @@ const [main, app, menu, admin, vercel] = await Promise.all([
 ]);
 
 const checks = [
-  ['admin route', main.includes("normalizedPath === '/admin'"), 'main.jsx'],
-  ['menu route', main.includes("normalizedPath === '/menu'"), 'main.jsx'],
-  ['cat route', main.includes("/^\\/koty\\/([^/]+)$/"), 'main.jsx'],
+  ['react router enabled', main.includes('BrowserRouter') && main.includes('<Routes>'), 'main.jsx'],
+  ['menu route', main.includes('<Route path="/menu"'), 'main.jsx'],
+  ['cat route', main.includes('<Route path="/koty/:slug"'), 'main.jsx'],
+  ['404 route', main.includes('<Route path="*"') && main.includes('NotFoundPage'), 'main.jsx'],
   ['menu page content', menu.includes("title: 'Kocia karta.'") && menu.includes('karta.'), 'MenuPage.jsx'],
   ['booking form', app.includes('Zarezerwuj stolik'), 'App.jsx'],
   ['events section', app.includes('id="events"'), 'App.jsx'],

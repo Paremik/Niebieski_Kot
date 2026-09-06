@@ -1,50 +1,88 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './src/pages/HomePage.jsx'
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import HomePage from './src/pages/HomePage.jsx'
 import MenuPage from './src/pages/MenuPage.jsx'
 import CatProfilePage, { catProfiles } from './src/pages/CatProfilePage.jsx'
+import NotFoundPage from './src/pages/NotFoundPage.jsx'
 import AdminPage from './AdminPage.jsx'
 import './styles.css'
 
-const searchParams = new URLSearchParams(window.location.search)
-const legacyMenuUrl = searchParams.get('page') === 'menu'
-const legacyCatSlug = searchParams.get('cat')
-const normalizedPath = window.location.pathname.replace(/\/+$/, '') || '/'
-const pathCatSlug = normalizedPath.match(/^\/koty\/([^/]+)$/)?.[1]
-const catSlug = catProfiles[pathCatSlug] ? pathCatSlug : catProfiles[legacyCatSlug] ? legacyCatSlug : null
-const isMenuPage = normalizedPath === '/menu' || legacyMenuUrl
-const isAdminPage = normalizedPath === '/admin'
-const isCatPage = Boolean(catSlug)
-if (legacyMenuUrl && normalizedPath !== '/menu') window.history.replaceState({}, '', '/menu')
-if (legacyCatSlug && catSlug && normalizedPath !== `/koty/${catSlug}`) window.history.replaceState({}, '', `/koty/${catSlug}`)
-const Page = isAdminPage ? AdminPage : isMenuPage ? MenuPage : App
-const pageMeta = isCatPage ? {
-  title: `${catProfiles[catSlug].name} — profil kota | Niebieski Kot`,
-  description: catProfiles[catSlug].seoDescription,
-  url: `https://niebieski-kot.vercel.app/koty/${catSlug}`,
-} : isAdminPage ? {
-  title: 'Admin | Niebieski Kot',
-  description: 'Panel administracyjny kociej kawiarni Niebieski Kot.',
-  url: 'https://niebieski-kot.vercel.app/admin',
-} : isMenuPage ? {
-  title: 'Menu | Niebieski Kot',
-  description: 'Kawy specialty, śniadania, lekkie dania i domowe słodkości w kociej kawiarni Niebieski Kot.',
-  url: 'https://niebieski-kot.vercel.app/menu',
-} : {
-  title: 'Niebieski Kot | Kocia kawiarnia w Opolu',
-  description: 'Niebieski Kot — kameralna kocia kawiarnia w Opolu. Specialty coffee, domowe słodkości i spokojne spotkania z mruczącymi rezydentami.',
-  url: 'https://niebieski-kot.vercel.app/',
+const siteUrl = 'https://niebieski-kot.vercel.app'
+
+function updateMeta(pathname) {
+  const slug = pathname.match(/^\/koty\/([^/]+)\/?$/)?.[1]
+  const pageMeta = slug && catProfiles[slug] ? {
+    title: `${catProfiles[slug].name} — profil kota | Niebieski Kot`,
+    description: catProfiles[slug].seoDescription,
+    url: `${siteUrl}/koty/${slug}`,
+  } : pathname === '/admin' ? {
+    title: 'Admin | Niebieski Kot',
+    description: 'Panel administracyjny kociej kawiarni Niebieski Kot.',
+    url: `${siteUrl}/admin`,
+  } : pathname === '/menu' ? {
+    title: 'Menu | Niebieski Kot',
+    description: 'Kawy specialty, śniadania, lekkie dania i domowe słodkości w kociej kawiarni Niebieski Kot.',
+    url: `${siteUrl}/menu`,
+  } : pathname === '/' ? {
+    title: 'Niebieski Kot | Kocia kawiarnia w Opolu',
+    description: 'Niebieski Kot — kameralna kocia kawiarnia w Opolu. Specialty coffee, domowe słodkości i spokojne spotkania z mruczącymi rezydentami.',
+    url: `${siteUrl}/`,
+  } : {
+    title: 'Nie znaleziono strony | Niebieski Kot',
+    description: 'Ta strona nie istnieje w serwisie Niebieski Kot.',
+    url: `${siteUrl}${pathname}`,
+  }
+
+  document.title = pageMeta.title
+  document.querySelector('meta[name="description"]')?.setAttribute('content', pageMeta.description)
+  document.querySelector('link[rel="canonical"]')?.setAttribute('href', pageMeta.url)
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', pageMeta.title)
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', pageMeta.description)
+  document.querySelector('meta[property="og:url"]')?.setAttribute('content', pageMeta.url)
 }
-document.title = pageMeta.title
-document.querySelector('meta[name="description"]')?.setAttribute('content', pageMeta.description)
-document.querySelector('link[rel="canonical"]')?.setAttribute('href', pageMeta.url)
-document.querySelector('meta[property="og:title"]')?.setAttribute('content', pageMeta.title)
-document.querySelector('meta[property="og:description"]')?.setAttribute('content', pageMeta.description)
-document.querySelector('meta[property="og:url"]')?.setAttribute('content', pageMeta.url)
+
+function DocumentMeta() {
+  const { pathname } = useLocation()
+  useEffect(() => updateMeta(pathname), [pathname])
+  return null
+}
+
+function CatRoute() {
+  const { slug } = useParams()
+  return catProfiles[slug] ? <CatProfilePage slug={slug}/> : <NotFoundPage/>
+}
+
+function AppRoutes() {
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const legacyCat = searchParams.get('cat')
+
+  if (location.pathname === '/' && searchParams.get('page') === 'menu') {
+    return <Navigate to="/menu" replace/>
+  }
+  if (location.pathname === '/' && legacyCat && catProfiles[legacyCat]) {
+    return <Navigate to={`/koty/${legacyCat}`} replace/>
+  }
+
+  return (
+    <>
+      <DocumentMeta/>
+      <Routes>
+        <Route path="/" element={<HomePage/>}/>
+        <Route path="/menu" element={<MenuPage/>}/>
+        <Route path="/koty/:slug" element={<CatRoute/>}/>
+        <Route path="/admin" element={<AdminPage/>}/>
+        <Route path="*" element={<NotFoundPage/>}/>
+      </Routes>
+    </>
+  )
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {isCatPage ? <CatProfilePage slug={catSlug}/> : <Page />}
+    <BrowserRouter>
+      <AppRoutes/>
+    </BrowserRouter>
   </React.StrictMode>,
 )
-
