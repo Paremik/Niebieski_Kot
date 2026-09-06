@@ -12,7 +12,7 @@ const checks = [
   ['admin route', main.includes("normalizedPath === '/admin'"), 'main.jsx'],
   ['menu route', main.includes("normalizedPath === '/menu'"), 'main.jsx'],
   ['cat route', main.includes("/^\\/koty\\/([^/]+)$/"), 'main.jsx'],
-  ['menu page content', menu.includes('Kocia<br/>') && menu.includes('karta.'), 'MenuPage.jsx'],
+  ['menu page content', menu.includes("title: 'Kocia karta.'") && menu.includes('karta.'), 'MenuPage.jsx'],
   ['booking form', app.includes('Zarezerwuj stolik'), 'App.jsx'],
   ['events section', app.includes('id="events"'), 'App.jsx'],
   ['admin editor', admin.includes('Сохранить изменения'), 'AdminPage.jsx'],

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowLeft, CalendarDays, Cat, Check, Clock3, Heart, Home, ShieldCheck, Sparkles, Stethoscope } from 'lucide-react';
+import LanguageSelect, { getLanguage } from './LanguageSelect.jsx';
 
 export const catProfiles = {
   luna: {
@@ -95,6 +96,7 @@ export const catProfiles = {
 
 export default function CatProfilePage({ slug = 'pixel' }) {
   const cat = catProfiles[slug] ?? catProfiles.pixel;
+  const language = getLanguage();
   const facts = [
     { icon: CalendarDays, label: 'Wiek', value: cat.age, note: cat.birth },
     { icon: Home, label: 'Z nami od', value: cat.joined, note: cat.origin },
@@ -103,7 +105,7 @@ export default function CatProfilePage({ slug = 'pixel' }) {
   ];
 
   return <div className="min-h-screen bg-[#f7f8f4] text-slate-950 selection:bg-sky-200">
-    <nav className="sticky top-0 z-40 border-b border-white/60 bg-[#f7f8f4]/90 backdrop-blur-xl"><div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-8"><a href="/" className="flex items-center gap-2.5"><span className="grid h-9 w-9 place-items-center rounded-full bg-sky-500 text-white"><Cat size={19}/></span><span className="text-lg font-extrabold tracking-tight">Niebieski Kot<span className="text-sky-500">.</span></span></a><a href="/#cats" className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold transition hover:border-sky-400 hover:text-sky-600"><ArrowLeft size={16}/> Wszystkie koty</a></div></nav>
+    <nav className="sticky top-0 z-40 border-b border-white/60 bg-[#f7f8f4]/90 backdrop-blur-xl"><div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-5 sm:px-8"><a href="/" className="flex items-center gap-2.5"><span className="grid h-9 w-9 place-items-center rounded-full bg-sky-500 text-white"><Cat size={19}/></span><span className="text-lg font-extrabold tracking-tight">Niebieski Kot<span className="text-sky-500">.</span></span></a><div className="flex items-center gap-2"><LanguageSelect/><a href="/#cats" className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold transition hover:border-sky-400 hover:text-sky-600"><ArrowLeft size={16}/> {language === 'ru' ? 'Все коты' : language === 'en' ? 'All cats' : 'Wszystkie koty'}</a></div></div></nav>
     <main>
       <header className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:py-20">
         <div className="relative"><div className="aspect-[4/5] overflow-hidden rounded-[3rem] bg-sky-100 shadow-2xl"><img src={cat.image} alt={cat.imageAlt} className="h-full w-full object-cover"/></div><span className="absolute bottom-5 left-5 flex items-center gap-2 rounded-full bg-amber-300 px-4 py-2.5 text-sm font-black text-amber-950 shadow-lg"><Heart size={16} fill="currentColor"/> {cat.badge}</span></div>
