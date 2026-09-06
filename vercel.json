@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/admin", "destination": "/index.html" },
     { "source": "/menu", "destination": "/index.html" },
     { "source": "/koty/:slug", "destination": "/index.html" }
   ],

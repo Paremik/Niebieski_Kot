@@ -1,7 +1,7 @@
 import { mkdir, copyFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const routes = ['menu', 'koty/luna', 'koty/mochi', 'koty/pixel'];
+const routes = ['admin', 'menu', 'koty/luna', 'koty/mochi', 'koty/pixel'];
 const source = join('dist', 'index.html');
 
 for (const route of routes) {

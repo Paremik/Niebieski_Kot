@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import MenuPage from './MenuPage.jsx'
 import CatProfilePage, { catProfiles } from './CatProfilePage.jsx'
+import AdminPage from './AdminPage.jsx'
 import './styles.css'
 
 const searchParams = new URLSearchParams(window.location.search)
@@ -12,14 +13,19 @@ const normalizedPath = window.location.pathname.replace(/\/+$/, '') || '/'
 const pathCatSlug = normalizedPath.match(/^\/koty\/([^/]+)$/)?.[1]
 const catSlug = catProfiles[pathCatSlug] ? pathCatSlug : catProfiles[legacyCatSlug] ? legacyCatSlug : null
 const isMenuPage = normalizedPath === '/menu' || legacyMenuUrl
+const isAdminPage = normalizedPath === '/admin'
 const isCatPage = Boolean(catSlug)
 if (legacyMenuUrl && normalizedPath !== '/menu') window.history.replaceState({}, '', '/menu')
 if (legacyCatSlug && catSlug && normalizedPath !== `/koty/${catSlug}`) window.history.replaceState({}, '', `/koty/${catSlug}`)
-const Page = isMenuPage ? MenuPage : App
+const Page = isAdminPage ? AdminPage : isMenuPage ? MenuPage : App
 const pageMeta = isCatPage ? {
   title: `${catProfiles[catSlug].name} — profil kota | Niebieski Kot`,
   description: catProfiles[catSlug].seoDescription,
   url: `https://niebieski-kot.vercel.app/koty/${catSlug}`,
+} : isAdminPage ? {
+  title: 'Admin | Niebieski Kot',
+  description: 'Panel administracyjny kociej kawiarni Niebieski Kot.',
+  url: 'https://niebieski-kot.vercel.app/admin',
 } : isMenuPage ? {
   title: 'Menu | Niebieski Kot',
   description: 'Kawy specialty, śniadania, lekkie dania i domowe słodkości w kociej kawiarni Niebieski Kot.',
