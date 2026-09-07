@@ -25,8 +25,8 @@ export const faqItems = [
 export const events = [
   { icon: Heart, tag: 'Każda niedziela', title: 'Joga z kotami', text: 'Łagodna praktyka dla początkujących, spokojna muzyka i koty spacerujące po sali.', meta: '10:00 · 60 minut · 45 zł' },
   { icon: Coffee, tag: 'Każdy piątek', title: 'Wieczór gier planszowych', text: 'Małe grupy, przytulne gry i gorący napój z naszej karty.', meta: '18:00 · 90 minut · 25 zł' },
-  { icon: Cat, tag: 'Dwie soboty w miesiącu', title: 'Czytania i warsztaty', text: 'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.', meta: '12:00 · 75 minut · od 20 zł' },
-  { icon: PawPrint, tag: 'Pierwsza niedziela miesiąca', title: 'Dzień adopcji', text: 'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.', meta: 'Wstęp wolny · obowiązują zapisy' },
+  { icon: Cat, tag: 'Pierwsza i druga sobota miesiąca', title: 'Czytania i warsztaty', text: 'Opowieści o zwierzętach, twórcze zajęcia i spokojny format dla całej rodziny.', meta: '12:00 · 75 minut · od 20 zł' },
+  { icon: PawPrint, tag: 'Pierwsza niedziela miesiąca', title: 'Dzień adopcji', text: 'Poznaj nasze koty, porozmawiaj z wolontariuszami i przygotuj się do odpowiedzialnej adopcji.', meta: '12:00 · Wstęp wolny · obowiązują zapisy' },
 ];
 
 export const menuSlides = [
