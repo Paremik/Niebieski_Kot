@@ -1,89 +1,65 @@
+export const contentLocales = ['pl', 'ru', 'en'];
+export const localized = (pl, ru = pl, en = pl) => ({ pl, ru, en });
+export const textFor = (value, language = 'pl') => typeof value === 'string' ? value : value?.[language] ?? value?.pl ?? '';
+
+const menu = [
+  ['espresso','coffee','Espresso','Эспрессо','Espresso','10 zł'], ['americano','coffee','Americano','Американо','Americano','12 zł'], ['cappuccino','coffee','Cappuccino','Капучино','Cappuccino','15 zł'], ['flat-white','coffee','Flat white','Флэт уайт','Flat white','17 zł'], ['cat-latte','coffee','Kocie latte','Кошачий латте','Cat latte','18 zł'],
+  ['matcha','other','Matcha latte','Матча латте','Matcha latte','18 zł'], ['tea','other','Herbata liściasta','Листовой чай','Loose-leaf tea','14 zł'], ['cocoa','other','Kakao z piankami','Какао с маршмеллоу','Cocoa with marshmallows','16 zł'], ['lemonade','other','Lemoniada sezonowa','Сезонный лимонад','Seasonal lemonade','17 zł'],
+  ['toast','food','Tost „Rudy Kocur”','Тост «Рыжий кот»','“Ginger Tom” toast','24 zł'], ['bagel','food','Bajgiel z jajkiem','Бейгл с яйцом','Egg bagel','26 zł'], ['goat-toast','food','Grzanka z kozim serem','Гренка с козьим сыром','Goat cheese toast','27 zł'], ['soup','food','Zupa dnia','Суп дня','Soup of the day','19 zł'], ['beet-salad','food','Sałatka z pieczonym burakiem','Салат с запечённой свёклой','Roasted beet salad','28 zł'],
+  ['cheesecake','sweet','Sernik baskijski','Баскский чизкейк','Basque cheesecake','19 zł'], ['apple-pie','sweet','Szarlotka na ciepło','Тёплый яблочный пирог','Warm apple pie','18 zł'], ['brownie','sweet','Brownie wegańskie','Веганский брауни','Vegan brownie','17 zł'], ['cookie','sweet','Kocie ciasteczko','Печенье-котик','Cat cookie','8 zł']
+].map(([id, group, pl, ru, en, price]) => ({ id, group, name: localized(pl, ru, en), price, enabled: true }));
+
 export const defaultData = {
-  schedule: [{
-    day: 'Poniedziałek',
-    hours: 'zamknięte'
-  }, {
-    day: 'Wtorek–Piątek',
-    hours: '11:00–20:00'
-  }, {
-    day: 'Sobota–Niedziela',
-    hours: '10:00–20:00'
-  }],
-  prices: [{
-    name: 'Espresso',
-    price: '10 zł'
-  }, {
-    name: 'Kocie latte',
-    price: '18 zł'
-  }, {
-    name: 'Sernik baskijski',
-    price: '19 zł'
-  }, {
-    name: 'Grzanka z kozim serem',
-    price: '27 zł'
-  }],
-  events: [{
-    title: 'Joga z kotami',
-    date: 'Każda niedziela · 10:00',
-    places: '8',
-    status: 'Zapisy otwarte'
-  }, {
-    title: 'Wieczór gier planszowych',
-    date: 'Każdy piątek · 18:00',
-    places: '12',
-    status: 'Zapisy otwarte'
-  }, {
-    title: 'Dzień adopcji',
-    date: 'Pierwsza niedziela miesiąca',
-    places: '20',
-    status: 'Planowane'
-  }],
-  availability: {
-    status: 'Spokojnie',
-    note: 'Dużo wolnych miejsc · aktualizacja ręczna'
-  },
-  cats: [{
-    name: 'Luna',
-    status: 'Stała gospodyni',
-    note: '4 lata · spokojna obserwatorka'
-  }, {
-    name: 'Mochi',
-    status: 'Stały gospodarz',
-    note: '6 lat · mistrz drzemek'
-  }, {
-    name: 'Pixel',
-    status: 'Szuka domu',
-    note: '2 lata · pierwszy do zabawy'
-  }]
+  schedule: [
+    { id:'monday', day:localized('Poniedziałek','Понедельник','Monday'), hours:localized('zamknięte','закрыто','closed') },
+    { id:'weekdays', day:localized('Wtorek–Piątek','Вторник–пятница','Tuesday–Friday'), hours:localized('11:00–20:00') },
+    { id:'weekend', day:localized('Sobota–Niedziela','Суббота–воскресенье','Saturday–Sunday'), hours:localized('10:00–20:00') }
+  ],
+  prices: menu,
+  events: [
+    { id:'yoga', title:localized('Joga z kotami','Йога с котами','Yoga with cats'), date:localized('Każda niedziela · 10:00','Каждое воскресенье · 10:00','Every Sunday · 10:00'), places:'8', status:'open', enabled:true },
+    { id:'games', title:localized('Wieczór gier planszowych','Вечер настольных игр','Board game evening'), date:localized('Każdy piątek · 18:00','Каждую пятницу · 18:00','Every Friday · 18:00'), places:'12', status:'open', enabled:true },
+    { id:'adoption', title:localized('Dzień adopcji','День усыновления','Adoption day'), date:localized('Pierwsza niedziela miesiąca','Первое воскресенье месяца','First Sunday of the month'), places:'20', status:'planned', enabled:true }
+  ],
+  availability: { status:'calm', note:localized('Dużo wolnych miejsc · aktualizacja ręczna','Много свободных мест · обновлено вручную','Plenty of free tables · updated manually') },
+  cats: [
+    { id:'luna', slug:'luna', name:'Luna', status:'resident', note:localized('4 lata · spokojna obserwatorka','4 года · спокойная наблюдательница','4 years · a calm observer'), intro:localized('Najchętniej siedzi przy oknie i sama wybiera moment na głaskanie.','Любит сидеть у окна и сама выбирает момент для ласки.','She loves sitting by the window and chooses when it is time for affection.'), enabled:true },
+    { id:'mochi', slug:'mochi', name:'Mochi', status:'resident', note:localized('6 lat · mistrz drzemek','6 лет · мастер сна','6 years · master napper'), intro:localized('Kocha miękkie koce, spokojne rozmowy i ludzi z książką na kolanach.','Любит мягкие пледы, спокойные разговоры и людей с книгой на коленях.','He loves soft blankets, quiet conversation and people reading a book.'), enabled:true },
+    { id:'pixel', slug:'pixel', name:'Pixel', status:'adoption', note:localized('2 lata · pierwszy do zabawy','2 года · всегда первый в игре','2 years · always first to play'), intro:localized('Wędkę wypatrzy z drugiego końca sali, a potem zasypia pod stolikiem.','Удочку заметит с другого конца зала, а потом уснёт под столиком.','He spots a teaser toy across the room, then falls asleep under a table.'), enabled:true }
+  ],
+  revision: 0,
+  updatedAt: null
 };
 
-export const storageKey = 'niebieski-kot-admin-data';
-const sections = ['schedule','prices','events','cats'];
-const schema = {schedule:['day','hours'], prices:['name','price'], events:['title','date','places','status'], cats:['name','status','note']};
-export function normalizeAdminData(saved) {
- const result = {};
- for (const section of sections) {
-  const rows = Array.isArray(saved?.[section]) ? saved[section] : defaultData[section];
-  result[section] = rows.slice(0,100).filter(row => row && typeof row === 'object' && schema[section].every(key=>typeof row[key] === 'string')).map((row,index)=>({id:section+'-'+index,...Object.fromEntries(schema[section].map(key=>[key,row[key].slice(0,500)]))}));
-  if(section==='events') for(const row of result.events) {
-   row.status = {'Записи открыты':'Zapisy otwarte','Планируется':'Planowane','Завершено':'Zakończone'}[row.status] || row.status;
-   if(!['Zapisy otwarte','Planowane','Zakończone'].includes(row.status))row.status='Planowane';
-  }
- }
- const a = saved?.availability;
- result.availability = {status: typeof a?.status==='string'?a.status:defaultData.availability.status, note:typeof a?.note==='string'?a.note.slice(0,500):defaultData.availability.note};
- result.availability.status = {'Спокойно':'Spokojnie','Умеренно занято':'Umiarkowanie zajęte','Почти нет мест':'Prawie pełno','Полностью занято':'Brak miejsc'}[result.availability.status] || result.availability.status;
- if(!['Spokojnie','Umiarkowanie zajęte','Prawie pełno','Brak miejsc'].includes(result.availability.status))result.availability.status='Spokojnie';
- return result;
+const clone = value => JSON.parse(JSON.stringify(value));
+const trim = (value, max = 500) => typeof value === 'string' ? value.trim().slice(0, max) : '';
+const localText = (value, fallback) => Object.fromEntries(contentLocales.map(locale => [locale, trim(value?.[locale] ?? (typeof value === 'string' ? value : fallback?.[locale]))]));
+const stableId = (value, fallback) => trim(value || fallback, 80).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+
+export function normalizeAdminData(input) {
+  const source = input && typeof input === 'object' ? input : {};
+  const result = clone(defaultData);
+  result.schedule = (Array.isArray(source.schedule) ? source.schedule : defaultData.schedule).slice(0,14).map((row,i)=>({id:stableId(row?.id,`schedule-${i}`),day:localText(row?.day,defaultData.schedule[i]?.day),hours:localText(row?.hours,defaultData.schedule[i]?.hours)}));
+  result.prices = (Array.isArray(source.prices) ? source.prices : defaultData.prices).slice(0,80).map((row,i)=>({id:stableId(row?.id,`menu-${i}`),group:['coffee','other','food','sweet'].includes(row?.group)?row.group:'coffee',name:localText(row?.name,defaultData.prices[i]?.name),price:trim(row?.price??defaultData.prices[i]?.price,30),enabled:row?.enabled!==false}));
+  result.events = (Array.isArray(source.events) ? source.events : defaultData.events).slice(0,30).map((row,i)=>({id:stableId(row?.id,`event-${i}`),title:localText(row?.title,defaultData.events[i]?.title),date:localText(row?.date,defaultData.events[i]?.date),places:trim(row?.places??'0',4),status:['open','planned','closed'].includes(row?.status)?row.status:'planned',enabled:row?.enabled!==false}));
+  const availability=source.availability??defaultData.availability;
+  result.availability={status:['calm','busy','almost-full','full'].includes(availability?.status)?availability.status:'calm',note:localText(availability?.note,defaultData.availability.note)};
+  result.cats=(Array.isArray(source.cats)?source.cats:defaultData.cats).slice(0,20).map((row,i)=>({id:stableId(row?.id,`cat-${i}`),slug:stableId(row?.slug,defaultData.cats[i]?.slug??`cat-${i}`),name:trim(row?.name??defaultData.cats[i]?.name,80),status:['resident','adoption','reserved'].includes(row?.status)?row.status:'resident',note:localText(row?.note,defaultData.cats[i]?.note),intro:localText(row?.intro,defaultData.cats[i]?.intro),enabled:row?.enabled!==false}));
+  result.revision=Number.isSafeInteger(source.revision)&&source.revision>=0?source.revision:0;
+  result.updatedAt=typeof source.updatedAt==='string'?source.updatedAt:null;
+  return result;
 }
-export function loadAdminData() {
- try { return normalizeAdminData(JSON.parse(window.localStorage.getItem(storageKey))); }
- catch { return normalizeAdminData(null); }
+
+export function validationErrors(input) {
+  const data=normalizeAdminData(input), errors=[];
+  const required=(value,label)=>contentLocales.forEach(locale=>{if(!trim(value?.[locale]))errors.push(`${label} (${locale.toUpperCase()})`);});
+  data.schedule.forEach((row,i)=>{required(row.day,`Dzień ${i+1}`);required(row.hours,`Godziny ${i+1}`);});
+  data.prices.forEach((row,i)=>{required(row.name,`Menu ${i+1}`);if(!/^\d+(?:[.,]\d{1,2})?\s*(?:zł|PLN)?$/i.test(row.price))errors.push(`Cena ${i+1}`);});
+  data.events.forEach((row,i)=>{required(row.title,`Wydarzenie ${i+1}`);required(row.date,`Data ${i+1}`);if(!/^\d{1,4}$/.test(row.places)||Number(row.places)>1000)errors.push(`Miejsca ${i+1}`);});
+  required(data.availability.note,'Dostępność');
+  data.cats.forEach((row,i)=>{if(!row.name||!row.slug)errors.push(`Kot ${i+1}`);required(row.note,`Opis kota ${i+1}`);required(row.intro,`Historia kota ${i+1}`);});
+  data.cats.forEach((row,i)=>{if(!['luna','mochi','pixel'].includes(row.slug))errors.push(`Adres profilu kota ${i+1}`);});
+  if(new Set(data.cats.map(row=>row.slug)).size!==data.cats.length)errors.push('Powtarzające się adresy kotów');
+  return [...new Set(errors)];
 }
-export function validAdminData(data) {
- const price = value => /^\d+(?:[.,]\d{1,2})?\s*(?:zł|PLN)?$/.test(value.trim());
- return sections.every(section=>data[section].every(row=>schema[section].every(key=>row[key].trim()))) &&
- data.prices.every(row=>price(row.price)) &&
- data.events.every(row=>/^\d+$/.test(row.places) && Number(row.places)<=1000) &&
- Boolean(data.availability.note.trim());
-}
+export const validAdminData = data => validationErrors(data).length===0;

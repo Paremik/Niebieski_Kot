@@ -15,9 +15,10 @@ import {catProfiles} from '../src/data/catProfiles.js';
 import {cats,rules,faqItems,events,menuSlides} from '../src/data/homeData.js';
 import {getBookingTimes,warsawTime} from '../src/lib/booking.js';
 import {normalizeAdminData,validAdminData} from '../src/data/adminData.js';
+import {SiteContentProvider} from '../src/content/SiteContentProvider.jsx';
 
 const locales=['pl','ru','en'];
-const render = (node,locale,path='/') => renderToStaticMarkup(<LanguageProvider initialLanguage={locale}><StaticRouter location={path}>{node}</StaticRouter></LanguageProvider>);
+const render = (node,locale,path='/') => renderToStaticMarkup(<LanguageProvider initialLanguage={locale}><SiteContentProvider initialData={normalizeAdminData(null)}><StaticRouter location={path}>{node}</StaticRouter></SiteContentProvider></LanguageProvider>);
 const neutral = new Set(['Luna','Mochi','Pixel','luna','mochi','pixel']);
 function auditData(value, path='') {
   if (typeof value === 'string') {

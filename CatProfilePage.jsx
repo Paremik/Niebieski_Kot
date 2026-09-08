@@ -5,6 +5,7 @@ import LanguageSelect from './LanguageSelect.jsx';
 import { useLanguage } from './src/i18n/LanguageProvider.jsx';
 import { localizeData } from './src/i18n/translate.js';
 import { catProfiles } from './src/data/catProfiles.js';
+import { useSiteContent } from './src/content/SiteContentProvider.jsx';
 export { catProfiles };
 export default function CatProfilePage({
   slug
@@ -13,7 +14,11 @@ export default function CatProfilePage({
     language,
     tr
   } = useLanguage();
-  const cat = localizeData(catProfiles[slug], language);
+  const { data: siteContent, text } = useSiteContent();
+  const baseCat = localizeData(catProfiles[slug], language);
+  const override = siteContent.cats.find(item => item.slug === slug);
+  const statusLabels = { resident: { pl:'Stały gospodarz', ru:'Постоянный житель', en:'Permanent resident' }, adoption: { pl:'Szuka domu', ru:'Ищет дом', en:'Looking for a home' }, reserved: { pl:'Adopcja w toku', ru:'Усыновление оформляется', en:'Adoption pending' } };
+  const cat = override ? { ...baseCat, name: override.name, tagline: text(override.note), intro: text(override.intro), status: statusLabels[override.status]?.[language] || baseCat.status } : baseCat;
   const ui = localizeData({
     resident: 'Poznaj naszego rezydenta',
     age: 'Wiek',

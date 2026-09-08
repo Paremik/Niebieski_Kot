@@ -3,6 +3,7 @@ import { useLanguage } from './src/i18n/LanguageProvider.jsx';
 import React from 'react';
 import { ArrowLeft, Cat, Coffee, Heart, Leaf, Sparkles, Wheat } from 'lucide-react';
 import LanguageSelect, { getLanguage } from './LanguageSelect.jsx';
+import { useSiteContent } from './src/content/SiteContentProvider.jsx';
 const groups = [{
   icon: Coffee,
   title: 'Kawy',
@@ -68,6 +69,7 @@ export default function MenuPage() {
     language,
     tr
   } = useLanguage();
+  const { data: siteContent, text } = useSiteContent();
   const t = copy[language];
   return <div className="min-h-screen bg-[#f7f8f4] text-slate-950">
     <nav className="sticky top-0 z-40 border-b border-white/60 bg-[#f7f8f4]/90 backdrop-blur-xl"><div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-5 sm:px-8"><Link to="/" className="flex items-center gap-2.5"><span className="grid h-9 w-9 place-items-center rounded-full bg-sky-500 text-white"><Cat size={19} /></span><span className="text-lg font-extrabold tracking-tight">Niebieski Kot<span className="text-sky-500">.</span></span></Link><div className="flex items-center gap-2"><LanguageSelect /><Link to="/" className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold transition hover:border-sky-400 hover:text-sky-600"><ArrowLeft size={16} /> {t.back}</Link></div></div></nav>
@@ -79,7 +81,8 @@ export default function MenuPage() {
           items
         }, index) => {
           const translated = groupCopy[language]?.[index];
-          return <section key={title} className={`rounded-[2.5rem] p-7 sm:p-9 ${index === 0 ? 'bg-slate-950 text-white' : index === 1 ? 'bg-sky-500 text-white' : 'border border-slate-200 bg-white'}`}><div className="mb-8 flex items-start justify-between"><div><h2 className="text-3xl font-black">{translated?.[0] || title}</h2><p className={`mt-1 text-sm ${index < 2 ? 'text-white/70' : 'text-slate-500'}`}>{translated?.[1] || note}</p></div><span className={`grid h-12 w-12 place-items-center rounded-2xl ${index < 2 ? 'bg-white text-sky-600' : 'bg-sky-100 text-sky-600'}`}><Icon size={22} /></span></div><div className="space-y-4">{items.map(([name, price]) => <div key={name} className="flex items-center gap-3"><span className="font-semibold">{tr(name)}</span><span className={`h-px flex-1 ${index < 2 ? 'bg-white/20' : 'bg-slate-200'}`} /><strong className="shrink-0 whitespace-nowrap">{price}</strong></div>)}</div></section>;
+          const dynamicItems = siteContent.prices.filter(item => item.enabled && item.group === ['coffee', 'other', 'food', 'sweet'][index]);
+          return <section key={title} className={`rounded-[2.5rem] p-7 sm:p-9 ${index === 0 ? 'bg-slate-950 text-white' : index === 1 ? 'bg-sky-500 text-white' : 'border border-slate-200 bg-white'}`}><div className="mb-8 flex items-start justify-between"><div><h2 className="text-3xl font-black">{translated?.[0] || title}</h2><p className={`mt-1 text-sm ${index < 2 ? 'text-white/70' : 'text-slate-500'}`}>{translated?.[1] || note}</p></div><span className={`grid h-12 w-12 place-items-center rounded-2xl ${index < 2 ? 'bg-white text-sky-600' : 'bg-sky-100 text-sky-600'}`}><Icon size={22} /></span></div><div className="space-y-4">{dynamicItems.map(item => <div key={item.id} className="flex items-center gap-3"><span className="font-semibold">{text(item.name)}</span><span className={`h-px flex-1 ${index < 2 ? 'bg-white/20' : 'bg-slate-200'}`} /><strong className="shrink-0 whitespace-nowrap">{item.price}</strong></div>)}</div></section>;
         })}</div>
       <div className="mt-6 rounded-[2rem] bg-amber-300 px-6 py-6 text-center sm:px-10"><p className="font-black">{t.fee}</p><p className="mt-1 text-sm text-amber-950/75">{t.feeText}</p></div>
       <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-slate-500">{t.note}</p>

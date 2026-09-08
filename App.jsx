@@ -6,8 +6,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, CalendarDays, Cat, Check, ChevronLeft, ChevronRight, Clock3, Coffee, Globe2, Heart, HeartHandshake, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, ShoppingBasket, X } from 'lucide-react';
 import BookingModal from './BookingModal.jsx';
 import SupportModal from './SupportModal.jsx';
-import { cats, rules, faqItems, events, menuSlides, catOfDay } from './src/data/homeData.js';
+import { cats as baseCats, rules, faqItems, events as baseEvents, menuSlides, catOfDay } from './src/data/homeData.js';
 import InfoRow from './src/components/InfoRow.jsx';
+import { useSiteContent } from './src/content/SiteContentProvider.jsx';
 const languageCopy = {
   pl: {
     nav: ['O nas', 'Koty', 'Menu', 'Zasady', 'Wydarzenia', 'Wesprzyj', 'Wizyta'],
@@ -163,6 +164,7 @@ const pageCopy = {
   }
 };
 export default function App() {
+  const { data: siteContent, text: contentText } = useSiteContent();
   const [chatOpen, setChatOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [input, setInput] = useState('');
@@ -178,7 +180,7 @@ export default function App() {
   const {
     language,
     setLanguage: changeLanguage,
-    tr
+    tr: translate
   } = useLanguage();
   const [messages, setMessages] = useState([{
     role: 'assistant',
@@ -197,8 +199,17 @@ export default function App() {
   const closeBooking = useCallback(() => setBookingOpen(false), []);
   const closeSupport = useCallback(() => setSupportOpen(false), []);
   const copy = languageCopy[language] || languageCopy.pl;
-  const page = pageCopy[language] || pageCopy.pl;
+  const page = { ...(pageCopy[language] || pageCopy.pl), open: contentText(siteContent.availability.note) };
   const catOfDayCopy = catOfDay[language] || catOfDay.pl;
+  const publicCats = siteContent.cats.filter(item => item.enabled).map(item => {
+    const original = baseCats.find(cat => cat.slug === item.slug);
+    return { ...original, ...item, image: original?.image || '/images/cat-placeholder.svg', note: contentText(item.note), story: contentText(item.intro), linkLabel: original?.linkLabel || 'Poznaj kota' };
+  });
+  const publicEvents = siteContent.events.filter(item => item.enabled).map((item,index) => ({ ...baseEvents[index % baseEvents.length], ...item, title: contentText(item.title), meta: contentText(item.date), spots: item.places }));
+  const cats = publicCats;
+  const events = publicEvents;
+  const scheduleSummary = siteContent.schedule.map(item => `${contentText(item.day)} ${contentText(item.hours)}`).join(' · ');
+  const tr = (source, values) => source === 'Wt–Pt 11:00–20:00 · Sob–Nd 10:00–20:00' ? scheduleSummary : translate(source, values);
   const scrollTo = id => {
     setMobileMenu(false);
     document.getElementById(id)?.scrollIntoView({
