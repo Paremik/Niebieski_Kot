@@ -1,7 +1,8 @@
 export function json(response, status, body, headers = {}) {
   response.statusCode = status;
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
-  response.setHeader('Cache-Control', 'no-store');
+  const hasCacheHeader = Object.keys(headers).some(name => name.toLowerCase() === 'cache-control');
+  if (!hasCacheHeader && !response.getHeader?.('Cache-Control')) response.setHeader('Cache-Control', 'no-store');
   Object.entries(headers).forEach(([name, value]) => response.setHeader(name, value));
   response.end(JSON.stringify(body));
 }

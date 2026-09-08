@@ -16,6 +16,7 @@ import {cats,rules,faqItems,events,menuSlides} from '../src/data/homeData.js';
 import {getBookingTimes,warsawTime} from '../src/lib/booking.js';
 import {normalizeAdminData,validAdminData} from '../src/data/adminData.js';
 import {SiteContentProvider} from '../src/content/SiteContentProvider.jsx';
+import {json} from '../api/_lib/http.js';
 
 const locales=['pl','ru','en'];
 const render = (node,locale,path='/') => renderToStaticMarkup(<LanguageProvider initialLanguage={locale}><SiteContentProvider initialData={normalizeAdminData(null)}><StaticRouter location={path}>{node}</StaticRouter></SiteContentProvider></LanguageProvider>);
@@ -73,6 +74,28 @@ test('normalizes language and rejects prototype cat routes',()=>{
 test('translation interpolates named fields and preserves unknown user text',()=>{
   assert.equal(translate('Kot {name}','en',{name:'Luna'}),'Luna the cat');
   assert.equal(translate('Custom draft title','ru'),'Custom draft title');
+});
+test('json helper keeps explicit cache headers and defaults to no-store',()=>{
+  const createResponse = () => {
+    const headers = new Map();
+    return {
+      body: '',
+      setHeader(name, value) { headers.set(name.toLowerCase(), value); },
+      getHeader(name) { return headers.get(name.toLowerCase()); },
+      end(value) { this.body = value; },
+      header(name) { return headers.get(name.toLowerCase()); }
+    };
+  };
+  const cached = createResponse();
+  cached.setHeader('Cache-Control','public, s-maxage=10');
+  json(cached,200,{ok:true});
+  assert.equal(cached.header('Cache-Control'),'public, s-maxage=10');
+  const fresh = createResponse();
+  json(fresh,200,{ok:true},{'Cache-Control':'private, no-store'});
+  assert.equal(fresh.header('Cache-Control'),'private, no-store');
+  const fallback = createResponse();
+  json(fallback,200,{ok:true});
+  assert.equal(fallback.header('Cache-Control'),'no-store');
 });
 test('booking rejects Mondays, invalid dates, past days and past times in Warsaw',()=>{
   const now=new Date('2026-09-06T14:00:00Z');
