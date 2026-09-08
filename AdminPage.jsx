@@ -22,7 +22,7 @@ export default function AdminPage(){
   const [password,setPassword]=useState(''),[showPassword,setShowPassword]=useState(false);
   const [busy,setBusy]=useState(false),[dirty,setDirty]=useState(false),[message,setMessage]=useState(null);
   const counter=useRef(0);
-  const load=async()=>{setBusy(true);setMessage(null);try{const body=await api('/api/content');setData(normalizeAdminData(body.data));setDirty(false);}catch{setMessage({kind:'error',text:t.failed});}finally{setBusy(false);}};
+  const load=async()=>{setBusy(true);setMessage(null);try{const body=await api(`/api/content?fresh=${Date.now()}`);setData(normalizeAdminData(body.data));setDirty(false);}catch{setMessage({kind:'error',text:t.failed});}finally{setBusy(false);}};
   useEffect(()=>{api('/api/auth/session').then(body=>{setSession({loading:false,...body});if(body.authenticated)load();}).catch(()=>setSession({loading:false,authenticated:false,configured:false}));},[]);
   useEffect(()=>{const warn=event=>{if(dirty){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
   const change=updater=>{setData(current=>typeof updater==='function'?updater(current):updater);setDirty(true);setMessage(null);};

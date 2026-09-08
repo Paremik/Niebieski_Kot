@@ -9,7 +9,8 @@ export default async function handler(request, response) {
       let stored = null;
       try { stored = await getContent(); } catch (error) { if (error.code !== 'STORAGE_NOT_CONFIGURED') throw error; }
       const data = normalizeAdminData(stored || defaultData);
-      response.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=60');
+      const fresh = new URL(request.url, 'https://niebieski-kot.vercel.app').searchParams.has('fresh');
+      response.setHeader('Cache-Control', fresh ? 'private, no-store' : 'public, s-maxage=10, stale-while-revalidate=60');
       return json(response, 200, { data, configured: Boolean(process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL) });
     }
     if (request.method !== 'PUT') return json(response, 405, { error: 'METHOD_NOT_ALLOWED' }, { Allow: 'GET, PUT' });
