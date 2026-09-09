@@ -1,7 +1,41 @@
+import { catProfiles } from './catProfiles.js';
+import { translate } from '../i18n/translate.js';
+
 export const contentLocales = ['pl', 'ru', 'en'];
 export const localized = (pl, ru = pl, en = pl) => ({ pl, ru, en });
 export const textFor = (value, language = 'pl') => typeof value === 'string' ? value : value?.[language] ?? value?.pl ?? '';
 const defaultBookingSettings = { maxTables: 6 };
+const clone = value => JSON.parse(JSON.stringify(value));
+const trim = (value, max = 500) => typeof value === 'string' ? value.trim().slice(0, max) : '';
+const localText = (value, fallback, max = 500) => Object.fromEntries(contentLocales.map(locale => [locale, trim(value?.[locale] ?? (typeof value === 'string' ? value : fallback?.[locale]), max)]));
+const stableId = (value, fallback) => trim(value || fallback, 80).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+
+export const catProfileTextFields = ['imageAlt','badge','tagline','intro','summaryTitle','summary','age','birth','joined','origin','healthStatus','healthNote','statusNote','historyLabel','historyTitle','healthIntro','friendshipTitle','friendship','signal','likesIntro','boundariesIntro','routineTitle','routineIntro','placeLabel','placeTitle','placeText','sideTitle','sideText','seoDescription'];
+export const catProfileListFields = ['story','health','likes','boundaries'];
+const translatedText = value => Object.fromEntries(contentLocales.map(locale => [locale, translate(String(value ?? ''), locale)]));
+const defaultCatProfile = slug => {
+  const source = catProfiles[slug] || {};
+  const profile = Object.fromEntries(catProfileTextFields.map(field => [field, translatedText(source[field])]));
+  profile.likesIntro = localized('Te rzeczy prawie zawsze poprawiają humor.','Эти вещи почти всегда поднимают настроение.','These things almost always improve their mood.');
+  profile.boundariesIntro = localized('Kilka prostych zasad pomaga czuć się bezpiecznie.','Несколько простых правил помогают чувствовать себя в безопасности.','A few simple rules help them feel safe.');
+  for (const field of catProfileListFields) profile[field] = (source[field] || []).map(translatedText);
+  profile.traits = (source.traits || []).map(item => ({ value: translatedText(item.value), label: translatedText(item.label) }));
+  profile.routine = (source.routine || []).map(([time, text]) => ({ time: translatedText(time), text: translatedText(text) }));
+  return profile;
+};
+const normalizeCatProfile = (value, fallback) => {
+  const source = value && typeof value === 'object' ? value : {};
+  const profile = Object.fromEntries(catProfileTextFields.map(field => [field, localText(source[field], fallback[field], field === 'seoDescription' ? 1000 : 2000)]));
+  for (const field of catProfileListFields) {
+    const rows = Array.isArray(source[field]) ? source[field] : fallback[field];
+    profile[field] = rows.slice(0, 20).map((item, index) => localText(item, fallback[field][index], 2000));
+  }
+  const traits = Array.isArray(source.traits) ? source.traits : fallback.traits;
+  profile.traits = traits.slice(0, 10).map((item, index) => ({ value: localText(item?.value, fallback.traits[index]?.value, 80), label: localText(item?.label, fallback.traits[index]?.label, 160) }));
+  const routine = Array.isArray(source.routine) ? source.routine : fallback.routine;
+  profile.routine = routine.slice(0, 20).map((item, index) => ({ time: localText(item?.time, fallback.routine[index]?.time, 80), text: localText(item?.text, fallback.routine[index]?.text, 2000) }));
+  return profile;
+};
 
 const menu = [
   ['espresso','coffee','Espresso','Эспрессо','Espresso','10 zł'], ['americano','coffee','Americano','Американо','Americano','12 zł'], ['cappuccino','coffee','Cappuccino','Капучино','Cappuccino','15 zł'], ['flat-white','coffee','Flat white','Флэт уайт','Flat white','17 zł'], ['cat-latte','coffee','Kocie latte','Кошачий латте','Cat latte','18 zł'],
@@ -25,18 +59,13 @@ export const defaultData = {
   availability: { status:'calm', note:localized('Dużo wolnych miejsc · aktualizacja ręczna','Много свободных мест · обновлено вручную','Plenty of free tables · updated manually') },
   bookingSettings: defaultBookingSettings,
   cats: [
-    { id:'luna', slug:'luna', name:'Luna', status:'resident', note:localized('4 lata · spokojna obserwatorka','4 года · спокойная наблюдательница','4 years · a calm observer'), intro:localized('Najchętniej siedzi przy oknie i sama wybiera moment na głaskanie.','Любит сидеть у окна и сама выбирает момент для ласки.','She loves sitting by the window and chooses when it is time for affection.'), enabled:true },
-    { id:'mochi', slug:'mochi', name:'Mochi', status:'resident', note:localized('6 lat · mistrz drzemek','6 лет · мастер сна','6 years · master napper'), intro:localized('Kocha miękkie koce, spokojne rozmowy i ludzi z książką na kolanach.','Любит мягкие пледы, спокойные разговоры и людей с книгой на коленях.','He loves soft blankets, quiet conversation and people reading a book.'), enabled:true },
-    { id:'pixel', slug:'pixel', name:'Pixel', status:'adoption', note:localized('2 lata · pierwszy do zabawy','2 года · всегда первый в игре','2 years · always first to play'), intro:localized('Wędkę wypatrzy z drugiego końca sali, a potem zasypia pod stolikiem.','Удочку заметит с другого конца зала, а потом уснёт под столиком.','He spots a teaser toy across the room, then falls asleep under a table.'), enabled:true }
+    { id:'luna', slug:'luna', name:'Luna', status:'resident', note:localized('4 lata · spokojna obserwatorka','4 года · спокойная наблюдательница','4 years · a calm observer'), intro:localized('Najchętniej siedzi przy oknie i sama wybiera moment na głaskanie.','Любит сидеть у окна и сама выбирает момент для ласки.','She loves sitting by the window and chooses when it is time for affection.'), profile:defaultCatProfile('luna'), enabled:true },
+    { id:'mochi', slug:'mochi', name:'Mochi', status:'resident', note:localized('6 lat · mistrz drzemek','6 лет · мастер сна','6 years · master napper'), intro:localized('Kocha miękkie koce, spokojne rozmowy i ludzi z książką na kolanach.','Любит мягкие пледы, спокойные разговоры и людей с книгой на коленях.','He loves soft blankets, quiet conversation and people reading a book.'), profile:defaultCatProfile('mochi'), enabled:true },
+    { id:'pixel', slug:'pixel', name:'Pixel', status:'adoption', note:localized('2 lata · pierwszy do zabawy','2 года · всегда первый в игре','2 years · always first to play'), intro:localized('Wędkę wypatrzy z drugiego końca sali, a potem zasypia pod stolikiem.','Удочку заметит с другого конца зала, а потом уснёт под столиком.','He spots a teaser toy across the room, then falls asleep under a table.'), profile:defaultCatProfile('pixel'), enabled:true }
   ],
   revision: 0,
   updatedAt: null
 };
-
-const clone = value => JSON.parse(JSON.stringify(value));
-const trim = (value, max = 500) => typeof value === 'string' ? value.trim().slice(0, max) : '';
-const localText = (value, fallback) => Object.fromEntries(contentLocales.map(locale => [locale, trim(value?.[locale] ?? (typeof value === 'string' ? value : fallback?.[locale]))]));
-const stableId = (value, fallback) => trim(value || fallback, 80).replace(/[^a-z0-9-]/gi, '-').toLowerCase();
 
 export function normalizeAdminData(input) {
   const source = input && typeof input === 'object' ? input : {};
@@ -48,7 +77,7 @@ export function normalizeAdminData(input) {
   result.availability={status:['calm','busy','almost-full','full'].includes(availability?.status)?availability.status:'calm',note:localText(availability?.note,defaultData.availability.note)};
   const maxTables=Number(source.bookingSettings?.maxTables);
   result.bookingSettings={maxTables:Number.isInteger(maxTables)&&maxTables>=1&&maxTables<=40?maxTables:defaultBookingSettings.maxTables};
-  result.cats=(Array.isArray(source.cats)?source.cats:defaultData.cats).slice(0,20).map((row,i)=>({id:stableId(row?.id,`cat-${i}`),slug:stableId(row?.slug,defaultData.cats[i]?.slug??`cat-${i}`),name:trim(row?.name??defaultData.cats[i]?.name,80),status:['resident','adoption','reserved'].includes(row?.status)?row.status:'resident',note:localText(row?.note,defaultData.cats[i]?.note),intro:localText(row?.intro,defaultData.cats[i]?.intro),enabled:row?.enabled!==false}));
+  result.cats=(Array.isArray(source.cats)?source.cats:defaultData.cats).slice(0,20).map((row,i)=>{const fallback=defaultData.cats.find(cat=>cat.slug===row?.slug)||defaultData.cats[i]||defaultData.cats[0];return {id:stableId(row?.id,`cat-${i}`),slug:stableId(row?.slug,fallback.slug??`cat-${i}`),name:trim(row?.name??fallback.name,80),status:['resident','adoption','reserved'].includes(row?.status)?row.status:'resident',note:localText(row?.note,fallback.note),intro:localText(row?.intro,fallback.intro),profile:normalizeCatProfile(row?.profile,fallback.profile),enabled:row?.enabled!==false};});
   result.revision=Number.isSafeInteger(source.revision)&&source.revision>=0?source.revision:0;
   result.updatedAt=typeof source.updatedAt==='string'?source.updatedAt:null;
   return result;
@@ -62,7 +91,14 @@ export function validationErrors(input) {
   data.events.forEach((row,i)=>{required(row.title,`Wydarzenie ${i+1}`);required(row.date,`Data ${i+1}`);if(!/^\d{1,4}$/.test(row.places)||Number(row.places)>1000)errors.push(`Miejsca ${i+1}`);});
   required(data.availability.note,'Dostępność');
   if(!Number.isInteger(data.bookingSettings.maxTables)||data.bookingSettings.maxTables<1||data.bookingSettings.maxTables>40)errors.push('Limit stolików');
-  data.cats.forEach((row,i)=>{if(!row.name||!row.slug)errors.push(`Kot ${i+1}`);required(row.note,`Opis kota ${i+1}`);required(row.intro,`Historia kota ${i+1}`);});
+  data.cats.forEach((row,i)=>{
+    if(!row.name||!row.slug)errors.push(`Kot ${i+1}`);
+    required(row.note,`Opis kota ${i+1}`); required(row.intro,`Historia kota ${i+1}`);
+    catProfileTextFields.forEach(field=>required(row.profile[field],`Profil kota ${i+1}: ${field}`));
+    catProfileListFields.forEach(field=>row.profile[field].forEach((item,index)=>required(item,`Profil kota ${i+1}: ${field} ${index+1}`)));
+    row.profile.traits.forEach((item,index)=>{required(item.value,`Profil kota ${i+1}: cecha ${index+1}`);required(item.label,`Profil kota ${i+1}: nazwa cechy ${index+1}`);});
+    row.profile.routine.forEach((item,index)=>{required(item.time,`Profil kota ${i+1}: pora ${index+1}`);required(item.text,`Profil kota ${i+1}: plan ${index+1}`);});
+  });
   data.cats.forEach((row,i)=>{if(!['luna','mochi','pixel'].includes(row.slug))errors.push(`Adres profilu kota ${i+1}`);});
   if(new Set(data.cats.map(row=>row.slug)).size!==data.cats.length)errors.push('Powtarzające się adresy kotów');
   return [...new Set(errors)];

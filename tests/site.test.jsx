@@ -129,6 +129,12 @@ test('corrupt admin data cannot crash the editor and numeric validation works',(
  data.prices[0].price='10.50 zł'; data.events[0].places='-1'; assert.equal(validAdminData(data),false);
   data.events[0].places='12'; assert.equal(validAdminData(data),true);
 });
+test('saved cat profile text is rendered on the public cat page',()=>{
+ const data=normalizeAdminData(null);
+ data.cats.find(cat=>cat.slug==='mochi').profile.summary.ru='Текст, изменённый в админ-панели.';
+ const html=renderToStaticMarkup(<LanguageProvider initialLanguage="ru"><SiteContentProvider initialData={data}><StaticRouter location="/koty/mochi"><AppRoutes/></StaticRouter></SiteContentProvider></LanguageProvider>);
+ assert.ok(html.includes('Текст, изменённый в админ-панели.'));
+});
 test('booking normalization and table limits count only active reservations',()=>{
  const rows=normalizeBookings([
   {id:'one',date:'2026-09-08',time:'11:00',guests:'2',name:'Anna',email:'ANNA@EXAMPLE.COM',status:'new'},
