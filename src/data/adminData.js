@@ -1,5 +1,6 @@
 import { catProfiles } from './catProfiles.js';
-import { translate } from '../i18n/translate.js';
+import catalog from '../i18n/catalog.json' with { type: 'json' };
+import profileTranslations from '../i18n/profiles.js';
 
 export const contentLocales = ['pl', 'ru', 'en'];
 export const localized = (pl, ru = pl, en = pl) => ({ pl, ru, en });
@@ -12,7 +13,8 @@ const stableId = (value, fallback) => trim(value || fallback, 80).replace(/[^a-z
 
 export const catProfileTextFields = ['imageAlt','badge','tagline','intro','summaryTitle','summary','age','birth','joined','origin','healthStatus','healthNote','statusNote','historyLabel','historyTitle','healthIntro','friendshipTitle','friendship','signal','likesIntro','boundariesIntro','routineTitle','routineIntro','placeLabel','placeTitle','placeText','sideTitle','sideText','seoDescription'];
 export const catProfileListFields = ['story','health','likes','boundaries'];
-const translatedText = value => Object.fromEntries(contentLocales.map(locale => [locale, translate(String(value ?? ''), locale)]));
+const profileMessages = { ...catalog, ...profileTranslations };
+const translatedText = value => Object.fromEntries(contentLocales.map(locale => [locale, profileMessages[String(value ?? '')]?.[locale] ?? String(value ?? '')]));
 const defaultCatProfile = slug => {
   const source = catProfiles[slug] || {};
   const profile = Object.fromEntries(catProfileTextFields.map(field => [field, translatedText(source[field])]));
