@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, CalendarDays, Cat, Check, ChevronLeft, ChevronRight, Clock3, Coffee, Globe2, Heart, HeartHandshake, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, ShoppingBasket, X } from 'lucide-react';
 import BookingModal from './BookingModal.jsx';
 import SupportModal from './SupportModal.jsx';
-import { cats as baseCats, rules, faqItems, events as baseEvents, menuSlides, catOfDay } from './src/data/homeData.js';
+import { cats as baseCats, rules, faqItems, events as baseEvents, menuSlides as baseMenuSlides, catOfDay } from './src/data/homeData.js';
 import InfoRow from './src/components/InfoRow.jsx';
 import { useSiteContent } from './src/content/SiteContentProvider.jsx';
 const languageCopy = {
@@ -193,9 +193,9 @@ export default function App() {
   useEffect(() => {
     if (carouselPaused) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-    const timer = window.setInterval(() => setMenuSlide(slide => (slide + 1) % menuSlides.length), 4500);
+    const timer = window.setInterval(() => setMenuSlide(slide => (slide + 1) % Math.max(siteContent.media.menuImages.length, 1)), 4500);
     return () => window.clearInterval(timer);
-  }, [carouselPaused]);
+  }, [carouselPaused, siteContent.media.menuImages.length]);
   const closeBooking = useCallback(() => setBookingOpen(false), []);
   const closeSupport = useCallback(() => setSupportOpen(false), []);
   const copy = languageCopy[language] || languageCopy.pl;
@@ -204,9 +204,14 @@ export default function App() {
   const catOfDayCopy = catOfDay[language] || catOfDay.pl;
   const publicCats = siteContent.cats.filter(item => item.enabled).map(item => {
     const original = baseCats.find(cat => cat.slug === item.slug);
-    return { ...original, ...item, image: original?.image || '/images/cat-placeholder.svg', note: contentText(item.note), story: contentText(item.intro), linkLabel: contentText(item.linkLabel) };
+    return { ...original, ...item, image: item.image || original?.image || '/images/cat-placeholder.svg', note: contentText(item.note), story: contentText(item.intro), linkLabel: contentText(item.linkLabel) };
   });
-  const publicEvents = siteContent.events.filter(item => item.enabled).map((item,index) => ({ ...baseEvents[index % baseEvents.length], ...item, tag: contentText(item.tag), title: contentText(item.title), text: contentText(item.description), meta: contentText(item.date), spots: item.places }));
+  const publicEvents = siteContent.events.filter(item => item.enabled).map((item,index) => {
+    const original = baseEvents[index % baseEvents.length];
+    const EventVisual = item.image ? () => <img src={item.image} alt="" className="h-full w-full rounded-2xl object-cover"/> : original.icon;
+    return { ...original, ...item, icon: EventVisual, tag: contentText(item.tag), title: contentText(item.title), text: contentText(item.description), meta: contentText(item.date), spots: item.places };
+  });
+  const menuSlides = siteContent.media.menuImages.length ? siteContent.media.menuImages.map(item => ({ ...item, alt: contentText(item.alt), label: contentText(item.label) })) : baseMenuSlides;
   const cats = publicCats;
   const events = publicEvents;
   const scheduleSummary = siteContent.schedule.map(item => `${contentText(item.day)} ${contentText(item.hours)}`).join(' · ');
@@ -266,7 +271,7 @@ export default function App() {
           <div className="mt-9 flex flex-wrap gap-3"><button onClick={() => {
               setBookingEvent(null);
               setBookingOpen(true);
-            }} className="flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 font-bold text-white shadow-xl transition hover:-translate-y-1 hover:bg-sky-600">{copy.booking} <ArrowRight size={18} /></button><button onClick={() => scrollTo('cats')} className="rounded-full border border-slate-300 bg-white px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">{copy.cats}</button></div>
+            }} data-track="booking-hero" className="flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 font-bold text-white shadow-xl transition hover:-translate-y-1 hover:bg-sky-600">{copy.booking} <ArrowRight size={18} /></button><button onClick={() => scrollTo('cats')} data-track="cats-scroll" className="rounded-full border border-slate-300 bg-white px-6 py-3.5 font-bold hover:border-sky-400 hover:text-sky-600">{copy.cats}</button></div>
           <div className="mt-12 flex flex-wrap gap-7 text-sm font-semibold text-slate-500"><span className="flex items-center gap-2"><Heart size={17} className="text-sky-500" /> {page.adopt}</span><span className="flex items-center gap-2"><Coffee size={17} className="text-sky-500" /> {page.coffee}</span></div>
         </div>
         <div className="relative mx-auto w-full max-w-[520px]"><div className="absolute -left-8 -top-8 h-40 w-40 rounded-full bg-sky-200/60 blur-2xl" /><div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] bg-sky-100 shadow-2xl"><img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=85&w=1200&auto=format&fit=crop" alt={page.homeTitle} className="h-full w-full object-cover" /><div className="absolute inset-x-5 bottom-5 rounded-3xl border border-white/40 bg-white/80 p-5 backdrop-blur-xl"><div className="flex items-center gap-4"><span className="grid h-11 w-11 place-items-center rounded-full bg-sky-500 text-white"><PawPrint size={21} /></span><div><p className="font-extrabold">{page.homeTitle}</p><p className="text-sm text-slate-600">{page.homeText}</p></div></div></div></div><div className="absolute -right-4 top-16 rotate-6 rounded-2xl bg-amber-300 px-4 py-3 text-sm font-black shadow-lg sm:-right-8">{tr("zero pośpiechu ✦")}</div></div>
@@ -276,9 +281,9 @@ export default function App() {
 
       <section id="cats" className="mx-auto max-w-6xl px-5 py-24 sm:px-8"><div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">{contentText(home.cats.label)}</span><h2 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{contentText(home.cats.title)}</h2></div><p className="max-w-md text-slate-600">{contentText(home.cats.text)}</p></div><div className="grid gap-5 md:grid-cols-3">{cats.map((cat, i) => <article key={cat.name} className={`group overflow-hidden rounded-[2rem] bg-white shadow-sm ${i === 1 ? 'md:translate-y-8' : ''}`}><div className="aspect-[4/5] overflow-hidden"><img src={cat.image} alt={tr("Kot {name}", {
                 name: cat.name
-              })} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" /></div><div className="p-5"><div className="flex items-center justify-between"><div><h3 className="text-xl font-black">{cat.name}</h3><p className="mt-1 text-sm font-semibold text-sky-600">{tr(cat.note)}</p></div><PawPrint className="text-sky-400" /></div><p className="mt-4 text-sm leading-relaxed text-slate-600">{tr(cat.story)}</p><Link to={`/koty/${cat.slug}`} className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-sky-600 transition hover:gap-3 hover:text-sky-700">{tr(cat.linkLabel)} <ArrowRight size={16} /></Link></div></article>)}</div></section>
+              })} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" /></div><div className="p-5"><div className="flex items-center justify-between"><div><h3 className="text-xl font-black">{cat.name}</h3><p className="mt-1 text-sm font-semibold text-sky-600">{tr(cat.note)}</p></div><PawPrint className="text-sky-400" /></div><p className="mt-4 text-sm leading-relaxed text-slate-600">{tr(cat.story)}</p><Link to={`/koty/${cat.slug}`} data-track={`cat-card-${cat.slug}`} className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-sky-600 transition hover:gap-3 hover:text-sky-700">{tr(cat.linkLabel)} <ArrowRight size={16} /></Link></div></article>)}</div></section>
 
-      <section id="cat-of-day" className="mx-auto w-full max-w-6xl px-5 pb-24 sm:px-8"><div className="grid overflow-hidden rounded-[3rem] bg-amber-300 lg:grid-cols-[.85fr_1.15fr]"><div className="relative min-h-[320px]"><img src={catOfDay.image} alt={`${catOfDayCopy.label} ${catOfDay.name}`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 to-transparent" /><span className="absolute bottom-6 left-6 rounded-full bg-white/90 px-4 py-2 text-sm font-black text-slate-950">{catOfDayCopy.label}</span></div><div className="p-7 sm:p-12"><span className="text-sm font-extrabold uppercase tracking-[.2em] text-amber-900">{catOfDayCopy.eyebrow}</span><h2 className="mt-3 text-5xl font-black tracking-tight">{catOfDay.name}.</h2><p className="mt-4 inline-flex rounded-full bg-white/70 px-4 py-2 text-sm font-extrabold text-amber-950">{catOfDayCopy.mood}</p><p className="mt-6 max-w-lg text-lg leading-relaxed text-amber-950/80">{catOfDayCopy.activity}</p><Link to={`/koty/${catOfDay.slug}`} className="mt-8 inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 font-extrabold text-white transition hover:-translate-y-1 hover:bg-sky-600">{catOfDayCopy.button} {catOfDay.name} <ArrowRight size={18} /></Link></div></div></section>
+      <section id="cat-of-day" className="mx-auto w-full max-w-6xl px-5 pb-24 sm:px-8"><div className="grid overflow-hidden rounded-[3rem] bg-amber-300 lg:grid-cols-[.85fr_1.15fr]"><div className="relative min-h-[320px]"><img src={cats.find(cat=>cat.slug===catOfDay.slug)?.image || catOfDay.image} alt={`${catOfDayCopy.label} ${catOfDay.name}`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 to-transparent" /><span className="absolute bottom-6 left-6 rounded-full bg-white/90 px-4 py-2 text-sm font-black text-slate-950">{catOfDayCopy.label}</span></div><div className="p-7 sm:p-12"><span className="text-sm font-extrabold uppercase tracking-[.2em] text-amber-900">{catOfDayCopy.eyebrow}</span><h2 className="mt-3 text-5xl font-black tracking-tight">{catOfDay.name}.</h2><p className="mt-4 inline-flex rounded-full bg-white/70 px-4 py-2 text-sm font-extrabold text-amber-950">{catOfDayCopy.mood}</p><p className="mt-6 max-w-lg text-lg leading-relaxed text-amber-950/80">{catOfDayCopy.activity}</p><Link to={`/koty/${catOfDay.slug}`} data-track="cat-of-day" className="mt-8 inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 font-extrabold text-white transition hover:-translate-y-1 hover:bg-sky-600">{catOfDayCopy.button} {catOfDay.name} <ArrowRight size={18} /></Link></div></div></section>
 
       <section id="visit" className="mx-auto max-w-6xl px-5 pb-24 pt-10 sm:px-8"><div className="grid overflow-hidden rounded-[3rem] bg-white shadow-xl lg:grid-cols-[1fr_.9fr]"><div className="p-7 sm:p-12"><span className="text-sm font-extrabold uppercase tracking-[.2em] text-sky-600">{contentText(home.visit.label)}</span><h2 className="mt-3 text-4xl font-black tracking-tight">{contentText(home.visit.title)}</h2><div className="mt-9 space-y-5">{home.visit.rows.map((row,index)=>{const Icon=[Clock3,MapPin,CalendarDays][index]||CalendarDays;return <InfoRow key={index} icon={Icon} title={contentText(row.title)} text={contentText(row.text)}/>;})}</div><div className="mt-9 flex flex-wrap gap-3"><button onClick={() => {
                 setBookingEvent(null);

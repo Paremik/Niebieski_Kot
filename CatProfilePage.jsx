@@ -26,7 +26,7 @@ export default function CatProfilePage({
     }
     return value;
   };
-  const cat = override ? { ...baseCat, ...resolveEditable(override.profile), name: override.name, status: statusLabels[override.status]?.[language] || baseCat.status } : baseCat;
+  const cat = override ? { ...baseCat, ...resolveEditable(override.profile), name: override.name, image: override.image || baseCat.image, status: statusLabels[override.status]?.[language] || baseCat.status } : baseCat;
   const ui = localizeData({
     resident: 'Poznaj naszego rezydenta',
     age: 'Wiek',

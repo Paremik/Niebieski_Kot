@@ -7,6 +7,8 @@ import AdminPage from '../AdminPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import {catProfiles} from './data/catProfiles.js';
 import {useLanguage} from './i18n/LanguageProvider.jsx';
+import {useSiteContent} from './content/SiteContentProvider.jsx';
+import {trackSiteEvent} from './lib/analytics.js';
 
 export const isCatSlug = slug => typeof slug === 'string' && Object.hasOwn(catProfiles, slug);
 export const normalizePath = path => path.replace(/\/+$/, '') || '/';
@@ -14,13 +16,15 @@ export const normalizePath = path => path.replace(/\/+$/, '') || '/';
 function DocumentMeta() {
   const {pathname, hash} = useLocation();
   const {language, tr} = useLanguage();
+  const {data: siteContent, text} = useSiteContent();
   useEffect(() => {
     const path = normalizePath(pathname);
     const slug = path.match(/^\/koty\/([^/]+)$/)?.[1];
     const cat = isCatSlug(slug) ? catProfiles[slug] : null;
     const titles = { '/': tr('Kocia kawiarnia w Opolu'), '/menu': tr('Jedzenie i napoje'), '/admin': tr('Panel administracyjny') };
-    const title = cat ? cat.name : titles[path] || tr('Tej strony jeszcze nie ma.');
-    const description = cat ? tr(cat.seoDescription) : tr('Projekt koncepcyjny — adres, kontakt i bohaterowie są demonstracyjne.');
+    const custom = siteContent.seo.pages.find(item => item.path === path);
+    const title = custom ? text(custom.title) : cat ? cat.name : titles[path] || tr('Tej strony jeszcze nie ma.');
+    const description = custom ? text(custom.description) : cat ? tr(cat.seoDescription) : tr('Projekt koncepcyjny — adres, kontakt i bohaterowie są demonstracyjne.');
     const set = (selector, attr, value) => document.querySelector(selector)?.setAttribute(attr, value);
     document.title = title + ' | Niebieski Kot';
     set('meta[name="description"]', 'content', description);
@@ -33,13 +37,28 @@ function DocumentMeta() {
     set('meta[property="og:url"]', 'content', 'https://niebieski-kot.vercel.app' + path);
     set('meta[property="og:locale"]', 'content', {pl:'pl_PL', ru:'ru_RU', en:'en_GB'}[language]);
     set('meta[name="robots"]', 'content', path === '/admin' || (!cat && !titles[path]) ? 'noindex, follow' : 'index, follow');
-  }, [pathname, language, tr]);
+  }, [pathname, language, tr, siteContent.seo.pages, text]);
   useEffect(() => {
     let id;
     try { id = decodeURIComponent(hash.slice(1)); } catch { id = ''; }
     if (id) document.getElementById(id)?.scrollIntoView({behavior:'instant'});
     else window.scrollTo({top:0, behavior:'instant'});
   }, [pathname, hash]);
+  return null;
+}
+
+function AnalyticsTracker() {
+  const {pathname} = useLocation();
+  useEffect(() => { const path=normalizePath(pathname); if(path!=='/admin')trackSiteEvent('pageview', path); }, [pathname]);
+  useEffect(() => {
+    const click = event => {
+      if (normalizePath(window.location.pathname) === '/admin') return;
+      const target = event.target.closest?.('[data-track]');
+      if (target?.dataset.track) trackSiteEvent('click', target.dataset.track);
+    };
+    document.addEventListener('click', click);
+    return () => document.removeEventListener('click', click);
+  }, []);
   return null;
 }
 
@@ -57,6 +76,7 @@ export default function AppRoutes() {
   }
   return <>
     <DocumentMeta />
+    <AnalyticsTracker />
     <Routes>
       <Route caseSensitive path="/" element={<HomePage />} />
       <Route caseSensitive path="/menu" element={<MenuPage />} />

@@ -144,6 +144,24 @@ test('saved homepage category text is rendered and legacy content is upgraded',(
  assert.ok(html.includes('Новый заголовок визита'));
  assert.ok(html.includes('Новая позиция списка'));
 });
+test('legacy content receives media and SEO defaults while unsafe image URLs are rejected',()=>{
+ const data=normalizeAdminData({cats:[{slug:'luna',image:'javascript:alert(1)'}],media:{menuImages:[]},seo:{pages:[]}});
+ assert.ok(data.cats[0].image.startsWith('https://'));
+ assert.equal(data.seo.pages.length,5);
+ assert.ok(data.seo.pages.every(page=>page.title.pl&&page.description.ru));
+ assert.ok(data.media.menuImages.length===0 || data.media.menuImages.every(item=>item.image));
+});
+test('uploaded cat and menu image URLs are used by public pages',()=>{
+ const data=normalizeAdminData(null);
+ data.cats[0].image='/api/media?id=12345678-1234-1234-1234-123456789abc';
+ data.media.menuImages[0].image='/api/media?id=abcdefab-1234-1234-1234-abcdefabcdef';
+ data.events[0].image='/api/media?id=87654321-4321-4321-4321-cba987654321';
+ const home=renderToStaticMarkup(<LanguageProvider initialLanguage="pl"><SiteContentProvider initialData={data}><StaticRouter location="/"><AppRoutes/></StaticRouter></SiteContentProvider></LanguageProvider>);
+ const cat=renderToStaticMarkup(<LanguageProvider initialLanguage="pl"><SiteContentProvider initialData={data}><StaticRouter location="/koty/luna"><AppRoutes/></StaticRouter></SiteContentProvider></LanguageProvider>);
+ assert.ok(home.includes('abcdefab-1234-1234-1234-abcdefabcdef'));
+ assert.ok(home.includes('87654321-4321-4321-4321-cba987654321'));
+ assert.ok(cat.includes('12345678-1234-1234-1234-123456789abc'));
+});
 test('booking normalization and table limits count only active reservations',()=>{
  const rows=normalizeBookings([
   {id:'one',date:'2026-09-08',time:'11:00',guests:'2',name:'Anna',email:'ANNA@EXAMPLE.COM',status:'new'},
