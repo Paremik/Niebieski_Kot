@@ -28,6 +28,12 @@ section[id] { scroll-margin-top: 6rem; }
 button, input, select, textarea { font: inherit; }
 button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #0284c7; outline-offset: 4px; }
 .admin-input { min-width: 0; }
+.admin-sections > section { display: none; }
+.admin-section-cafe > section:nth-child(1), .admin-section-cafe > section:nth-child(2),
+.admin-section-bookings > section:nth-child(3), .admin-section-menu > section:nth-child(4),
+.admin-section-events > section:nth-child(5), .admin-section-cat-cards > section:nth-child(6),
+.admin-section-cat-profiles > section:nth-child(7), .admin-section-visit > section:nth-child(8),
+.admin-section-needs > section:nth-child(9) { display: block; }
 @media (max-width: 639px) {
   nav > div { height: auto; min-height: 5rem; flex-wrap: wrap; padding-top: .75rem; padding-bottom: .75rem; gap: .75rem; }
   nav a { min-width: 0; }

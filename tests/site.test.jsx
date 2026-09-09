@@ -135,6 +135,15 @@ test('saved cat profile text is rendered on the public cat page',()=>{
  const html=renderToStaticMarkup(<LanguageProvider initialLanguage="ru"><SiteContentProvider initialData={data}><StaticRouter location="/koty/mochi"><AppRoutes/></StaticRouter></SiteContentProvider></LanguageProvider>);
  assert.ok(html.includes('Текст, изменённый в админ-панели.'));
 });
+test('saved homepage category text is rendered and legacy content is upgraded',()=>{
+ const data=normalizeAdminData({events:[{id:'legacy',title:{pl:'Test',ru:'Тест',en:'Test'},date:{pl:'Data',ru:'Дата',en:'Date'},places:'5'}]});
+ assert.ok(data.events[0].tag.pl && data.events[0].description.ru);
+ data.homepage.visit.title.ru='Новый заголовок визита';
+ data.homepage.needs.items[0].ru='Новая позиция списка';
+ const html=renderToStaticMarkup(<LanguageProvider initialLanguage="ru"><SiteContentProvider initialData={data}><StaticRouter location="/"><AppRoutes/></StaticRouter></SiteContentProvider></LanguageProvider>);
+ assert.ok(html.includes('Новый заголовок визита'));
+ assert.ok(html.includes('Новая позиция списка'));
+});
 test('booking normalization and table limits count only active reservations',()=>{
  const rows=normalizeBookings([
   {id:'one',date:'2026-09-08',time:'11:00',guests:'2',name:'Anna',email:'ANNA@EXAMPLE.COM',status:'new'},
