@@ -2,7 +2,7 @@ import { localized } from './adminData.js';
 
 export const bookingStatuses = ['new', 'confirmed', 'cancelled', 'completed'];
 export const activeBookingStatuses = ['new', 'confirmed'];
-export const defaultBookingSettings = { maxTables: 6 };
+export const defaultBookingSettings = { maxTables: 6, blockedDates: [], specialDates: [] };
 
 export const bookingStatusText = {
   new: localized('Nowa', 'Новая', 'New'),
@@ -18,7 +18,8 @@ const safeTime = value => /^\d{2}:\d{2}$/.test(value || '') ? value : '';
 
 export function normalizeBookingSettings(input) {
   const maxTables = Number(input?.maxTables);
-  return { maxTables: Number.isInteger(maxTables) && maxTables >= 1 && maxTables <= 40 ? maxTables : defaultBookingSettings.maxTables };
+  const blockedDates = Array.isArray(input?.blockedDates) ? input.blockedDates.filter(value => /^\d{4}-\d{2}-\d{2}$/.test(String(value))).slice(0, 100) : [];
+  return { maxTables: Number.isInteger(maxTables) && maxTables >= 1 && maxTables <= 40 ? maxTables : defaultBookingSettings.maxTables, blockedDates };
 }
 
 export function normalizeBooking(input, index = 0) {
@@ -37,6 +38,7 @@ export function normalizeBooking(input, index = 0) {
     status,
     adminNote: trim(source.adminNote, 500),
     notificationStatus: trim(source.notificationStatus, 80),
+    adminNotificationStatus: trim(source.adminNotificationStatus, 80),
     notifiedAt: typeof source.notifiedAt === 'string' ? source.notifiedAt : null,
     createdAt: typeof source.createdAt === 'string' ? source.createdAt : null,
     updatedAt: typeof source.updatedAt === 'string' ? source.updatedAt : null

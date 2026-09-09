@@ -1,6 +1,6 @@
 import { defaultData, normalizeAdminData, validationErrors } from '../src/data/adminData.js';
 import { getContent, setContent } from './_lib/redis.js';
-import { isAuthenticated } from './_lib/auth.js';
+import { isAuthenticated, sessionUser } from './_lib/auth.js';
 import { bodyOf, json, sameOrigin } from './_lib/http.js';
 
 export default async function handler(request, response) {
@@ -16,6 +16,7 @@ export default async function handler(request, response) {
     if (request.method !== 'PUT') return json(response, 405, { error: 'METHOD_NOT_ALLOWED' }, { Allow: 'GET, PUT' });
     if (!sameOrigin(request)) return json(response, 403, { error: 'INVALID_ORIGIN' });
     if (!isAuthenticated(request)) return json(response, 401, { error: 'UNAUTHORIZED' });
+    if (sessionUser(request)?.role === 'staff') return json(response, 403, { error: 'FORBIDDEN' });
     if (Number(request.headers['content-length'] || 0) > 250000) return json(response, 413, { error: 'PAYLOAD_TOO_LARGE' });
     const current = normalizeAdminData((await getContent()) || defaultData);
     const requested = bodyOf(request);

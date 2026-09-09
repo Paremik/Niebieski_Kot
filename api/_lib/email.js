@@ -49,3 +49,14 @@ export async function sendBookingEmail(booking, status = 'received') {
   const body = await response.json().catch(() => ({}));
   return { sent: true, id: body?.id };
 }
+
+export async function sendAdminBookingEmail(booking, recipient) {
+  if (!process.env.RESEND_API_KEY || !recipient) return { sent: false, reason: 'ADMIN_EMAIL_NOT_CONFIGURED' };
+  const from = process.env.BOOKING_EMAIL_FROM || 'Niebieski Kot <onboarding@resend.dev>';
+  const details = [['Termin', `${booking.date} · ${booking.time}`], ['Goście', booking.guests], ['Imię', booking.name], ['E-mail', booking.email], booking.eventTitle ? ['Wydarzenie', booking.eventTitle] : null, booking.notes ? ['Uwagi', booking.notes] : null].filter(Boolean);
+  const rows = details.map(([label, value]) => `<tr><td style="padding:8px 12px;color:#475569">${escapeHtml(label)}</td><td style="padding:8px 12px;font-weight:700;color:#0f172a">${escapeHtml(value)}</td></tr>`).join('');
+  const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': `admin-booking-${booking.id}` }, body: JSON.stringify({ from, to: recipient, subject: `Nowa rezerwacja · ${booking.date} ${booking.time}`, html: `<div style="font-family:Arial,sans-serif;background:#f7f8f4;padding:24px"><div style="max-width:560px;margin:auto;background:white;border-radius:20px;padding:28px;border:1px solid #e2e8f0"><h1 style="margin:0 0 12px;font-size:24px;color:#0f172a">Nowa rezerwacja</h1><p style="line-height:1.6;color:#334155">W panelu administracyjnym pojawiła się nowa prośba o stolik.</p><table style="width:100%;border-collapse:collapse;background:#f8fafc;border-radius:14px;overflow:hidden">${rows}</table></div></div>` }) });
+  if (!response.ok) return { sent: false, reason: `ADMIN_EMAIL_FAILED_${response.status}` };
+  const body = await response.json().catch(() => ({}));
+  return { sent: true, id: body?.id };
+}

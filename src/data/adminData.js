@@ -7,7 +7,23 @@ import { cats as baseCats, menuSlides } from './homeData.js';
 export const contentLocales = ['pl', 'ru', 'en'];
 export const localized = (pl, ru = pl, en = pl) => ({ pl, ru, en });
 export const textFor = (value, language = 'pl') => typeof value === 'string' ? value : value?.[language] ?? value?.pl ?? '';
-const defaultBookingSettings = { maxTables: 6 };
+const defaultBookingSettings = { maxTables: 6, blockedDates: [], specialDates: [] };
+const defaultCafeSettings = {
+  address: localized('ul. Krakowska 32, 45-075 Opole', 'ул. Краковская 32, 45-075 Ополе', '32 Krakowska St, 45-075 Opole'),
+  phone: '+48 600 123 456',
+  email: 'czesc@niebieskikot-opole.pl',
+  instagram: '@niebieszikot.opole',
+  facebook: 'Niebieski Kot Opole',
+  mapUrl: 'https://www.openstreetmap.org/search?query=Krakowska%2032%20Opole',
+  rules: [
+    localized('Przed wejściem do strefy kotów dezynfekujemy ręce.', 'Перед входом в зону котов дезинфицируем руки.', 'Please sanitise your hands before entering the cats’ area.'),
+    localized('Pozwalamy kotom decydować o kontakcie — nie budzimy ich i nie bierzemy na ręce.', 'Позволяем котам самим решать, хотят ли они контакта — не будим и не берём на руки.', 'Let cats decide when they want contact — do not wake or pick them up.'),
+    localized('Zdjęcia robimy bez lampy błyskowej, z szacunkiem dla kociego spokoju.', 'Фотографируем без вспышки, уважая спокойствие котов.', 'Take photos without flash and respect the cats’ quiet.'),
+    localized('Dzieci zapraszamy pod stałą opieką dorosłych; szczegóły potwierdzi obsługa.', 'Дети могут приходить только под постоянным присмотром взрослых.', 'Children are welcome with continuous adult supervision.')
+  ],
+  adminNotificationEmail: '',
+  adminNotificationsEnabled: true
+};
 const clone = value => JSON.parse(JSON.stringify(value));
 const trim = (value, max = 500) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 const localText = (value, fallback, max = 500) => Object.fromEntries(contentLocales.map(locale => [locale, trim(value?.[locale] ?? (typeof value === 'string' ? value : fallback?.[locale]), max)]));
@@ -66,6 +82,7 @@ export const defaultData = {
   ],
   availability: { status:'calm', note:localized('Dużo wolnych miejsc · aktualizacja ręczna','Много свободных мест · обновлено вручную','Plenty of free tables · updated manually') },
   bookingSettings: defaultBookingSettings,
+  cafeSettings: defaultCafeSettings,
   media: {
     menuImages: menuSlides.map((slide, index) => ({ id:`menu-image-${index + 1}`, image:slide.image, alt:translatedText(slide.alt), label:translatedText(slide.label) }))
   },
@@ -106,7 +123,14 @@ export function normalizeAdminData(input) {
   const availability=source.availability??defaultData.availability;
   result.availability={status:['calm','busy','almost-full','full'].includes(availability?.status)?availability.status:'calm',note:localText(availability?.note,defaultData.availability.note)};
   const maxTables=Number(source.bookingSettings?.maxTables);
-  result.bookingSettings={maxTables:Number.isInteger(maxTables)&&maxTables>=1&&maxTables<=40?maxTables:defaultBookingSettings.maxTables};
+  const blockedDates=Array.isArray(source.bookingSettings?.blockedDates)?source.bookingSettings.blockedDates.filter(value=>/^\d{4}-\d{2}-\d{2}$/.test(String(value))).slice(0,100):[];
+  const specialDates=Array.isArray(source.bookingSettings?.specialDates)?source.bookingSettings.specialDates.slice(0,50).map((row)=>({date:/^\d{4}-\d{2}-\d{2}$/.test(String(row?.date))?String(row.date):'',slots:Array.isArray(row?.slots)?row.slots.filter(value=>/^\d{2}:\d{2}$/.test(String(value))).slice(0,20):[]})).filter(row=>row.date):[];
+  result.bookingSettings={maxTables:Number.isInteger(maxTables)&&maxTables>=1&&maxTables<=40?maxTables:defaultBookingSettings.maxTables,blockedDates,specialDates};
+  const cafe=source.cafeSettings&&typeof source.cafeSettings==='object'?source.cafeSettings:{};
+  result.cafeSettings={
+    address:localText(cafe.address,defaultCafeSettings.address,300), phone:trim(cafe.phone??defaultCafeSettings.phone,40), email:trim(cafe.email??defaultCafeSettings.email,254), instagram:trim(cafe.instagram??defaultCafeSettings.instagram,120), facebook:trim(cafe.facebook??defaultCafeSettings.facebook,120), mapUrl:/^https:\/\//i.test(String(cafe.mapUrl||''))?trim(cafe.mapUrl,1000):defaultCafeSettings.mapUrl,
+    rules:(Array.isArray(cafe.rules)?cafe.rules:defaultCafeSettings.rules).slice(0,12).map((item,index)=>localText(item,defaultCafeSettings.rules[index]||defaultCafeSettings.rules[0],500)), adminNotificationEmail:trim(cafe.adminNotificationEmail??'',254), adminNotificationsEnabled:cafe.adminNotificationsEnabled!==false
+  };
   const media=source.media&&typeof source.media==='object'?source.media:{};
   result.media.menuImages=(Array.isArray(media.menuImages)?media.menuImages:defaultData.media.menuImages).slice(0,8).map((row,i)=>{const fallback=defaultData.media.menuImages[i%defaultData.media.menuImages.length];return {id:stableId(row?.id,`menu-image-${i}`),image:safeImage(row?.image,fallback.image),alt:localText(row?.alt,fallback.alt),label:localText(row?.label,fallback.label)};});
   const seo=source.seo&&typeof source.seo==='object'?source.seo:{};
@@ -130,6 +154,10 @@ export function validationErrors(input) {
   data.events.forEach((row,i)=>{required(row.tag,`Etykieta wydarzenia ${i+1}`);required(row.title,`Wydarzenie ${i+1}`);required(row.description,`Opis wydarzenia ${i+1}`);required(row.date,`Data ${i+1}`);if(!/^\d{1,4}$/.test(row.places)||Number(row.places)>1000)errors.push(`Miejsca ${i+1}`);});
   required(data.availability.note,'Dostępność');
   if(!Number.isInteger(data.bookingSettings.maxTables)||data.bookingSettings.maxTables<1||data.bookingSettings.maxTables>40)errors.push('Limit stolików');
+  required(data.cafeSettings.address,'Adres kawiarni');
+  if(!/^\+?[0-9 ()-]{7,40}$/.test(data.cafeSettings.phone))errors.push('Telefon kawiarni');
+  if(!/^\S+@\S+\.\S+$/.test(data.cafeSettings.email))errors.push('E-mail kawiarni');
+  if(data.cafeSettings.adminNotificationsEnabled && data.cafeSettings.adminNotificationEmail && !/^\S+@\S+\.\S+$/.test(data.cafeSettings.adminNotificationEmail))errors.push('E-mail powiadomień');
   data.media.menuImages.forEach((row,i)=>{if(!row.image)errors.push(`Zdjęcie menu ${i+1}`);required(row.alt,`Opis zdjęcia menu ${i+1}`);required(row.label,`Nazwa zdjęcia menu ${i+1}`);});
   data.seo.pages.forEach(row=>{required(row.title,`SEO ${row.path}: title`);required(row.description,`SEO ${row.path}: description`);});
   data.cats.forEach((row,i)=>{

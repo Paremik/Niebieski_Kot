@@ -3,14 +3,17 @@ export function warsawTime(now = new Date()) {
   const date = `${parts.year}-${parts.month}-${parts.day}`;
   return {date, time:`${parts.hour}:${parts.minute}`, day: new Date(`${date}T12:00:00Z`).getUTCDay()};
 }
-export function getBookingTimes(date, now = new Date(), eventIndex = null) {
+export function getBookingTimes(date, now = new Date(), eventIndex = null, settings = {}) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return [];
   const parsed = new Date(`${date}T12:00:00Z`);
   if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0,10) !== date) return [];
   const current = warsawTime(now);
   if (date < current.date) return [];
   const day = parsed.getUTCDay();
-  if (day === 1) return [];
+  if (settings.blockedDates?.includes?.(date)) return [];
+  const special = settings.specialDates?.find?.(row => row?.date === date);
+  if (special) return special.slots || [];
+  if (day === 1 && !settings.openDates?.includes?.(date)) return [];
   let times = day === 0 || day === 6 ? ['10:00'] : [];
   times.push('11:00','12:30','14:00','15:30','17:00','18:30');
   if (eventIndex === 0) times = day === 0 ? ['10:00'] : [];

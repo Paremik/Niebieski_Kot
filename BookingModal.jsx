@@ -4,6 +4,7 @@ import { CalendarDays, Check, Clock3, Loader2, Mail, Users, X } from 'lucide-rea
 import LanguageSelect from './LanguageSelect.jsx';
 import useModalFocus from './src/hooks/useModalFocus.js';
 import {getBookingTimes, warsawTime} from './src/lib/booking.js';
+import { useSiteContent } from './src/content/SiteContentProvider.jsx';
 const initialForm = {
   date: '',
   time: '',
@@ -21,6 +22,8 @@ export default function BookingModal({
   const {
     tr
   } = useLanguage();
+  const { data: siteContent } = useSiteContent();
+  const bookingSettings = siteContent.bookingSettings || {};
   const [form, setForm] = useState(initialForm);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -41,7 +44,7 @@ export default function BookingModal({
   };
   const submit = async event => {
     event.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.consent || !getBookingTimes(form.date, new Date(), bookingEvent?.index).includes(form.time)) {setError('invalid'); return;}
+    if (!form.name.trim() || !form.email.trim() || !form.consent || !getBookingTimes(form.date, new Date(), bookingEvent?.index, bookingSettings).includes(form.time)) {setError('invalid'); return;}
     setSubmitting(true);
     setError('');
     try {
@@ -63,7 +66,7 @@ export default function BookingModal({
       setSubmitting(false);
     }
   };
-  const times = getBookingTimes(form.date, new Date(), bookingEvent?.index);
+  const times = getBookingTimes(form.date, new Date(), bookingEvent?.index, bookingSettings);
   return <div className="fixed inset-0 z-[70] grid place-items-center overflow-y-auto bg-slate-950/65 p-4 backdrop-blur-sm" onMouseDown={event => event.target === event.currentTarget && close()}>
     <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="booking-title" className="relative my-auto w-full max-w-2xl overflow-hidden rounded-[2.25rem] bg-[#f7f8f4] shadow-2xl">
       <div className="absolute left-5 top-4"><LanguageSelect /></div>

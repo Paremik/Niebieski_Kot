@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, CalendarDays, Cat, Check, ChevronLeft, ChevronRight, Clock3, Coffee, Globe2, Heart, HeartHandshake, Instagram, MapPin, Menu, MessageCircle, PawPrint, Send, ShieldCheck, ShoppingBasket, X } from 'lucide-react';
 import BookingModal from './BookingModal.jsx';
 import SupportModal from './SupportModal.jsx';
-import { cats as baseCats, rules, faqItems, events as baseEvents, menuSlides as baseMenuSlides, catOfDay } from './src/data/homeData.js';
+import { cats as baseCats, rules as baseRules, faqItems, events as baseEvents, menuSlides as baseMenuSlides, catOfDay } from './src/data/homeData.js';
 import InfoRow from './src/components/InfoRow.jsx';
 import { useSiteContent } from './src/content/SiteContentProvider.jsx';
 const languageCopy = {
@@ -201,6 +201,8 @@ export default function App() {
   const copy = languageCopy[language] || languageCopy.pl;
   const page = { ...(pageCopy[language] || pageCopy.pl), open: contentText(siteContent.availability.note) };
   const home = siteContent.homepage;
+  const cafe = siteContent.cafeSettings;
+  const rules = (cafe.rules?.length ? cafe.rules : baseRules).map(item => contentText(item));
   const catOfDayCopy = catOfDay[language] || catOfDay.pl;
   const publicCats = siteContent.cats.filter(item => item.enabled).map(item => {
     const original = baseCats.find(cat => cat.slug === item.slug);
@@ -215,7 +217,7 @@ export default function App() {
   const cats = publicCats;
   const events = publicEvents;
   const scheduleSummary = siteContent.schedule.map(item => `${contentText(item.day)} ${contentText(item.hours)}`).join(' · ');
-  const tr = (source, values) => source === 'Wt–Pt 11:00–20:00 · Sob–Nd 10:00–20:00' ? scheduleSummary : translate(source, values);
+  const tr = (source, values) => source === 'Wt–Pt 11:00–20:00 · Sob–Nd 10:00–20:00' ? scheduleSummary : source === 'ul. Krakowska 32 · Opole · czesc@niebieskikot-opole.pl' ? `${contentText(cafe.address)} · ${cafe.email}` : translate(source, values);
   const scrollTo = id => {
     setMobileMenu(false);
     document.getElementById(id)?.scrollIntoView({

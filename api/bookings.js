@@ -4,7 +4,7 @@ import { bookingSlotIsFull, bookingStatuses, bookingValidationErrors, normalizeB
 import { getBookings, getContent, setBookings } from './_lib/redis.js';
 import { isAuthenticated } from './_lib/auth.js';
 import { bodyOf, json, sameOrigin } from './_lib/http.js';
-import { sendBookingEmail } from './_lib/email.js';
+import { sendAdminBookingEmail, sendBookingEmail } from './_lib/email.js';
 import { getBookingTimes } from '../src/lib/booking.js';
 
 const bookingId = () => `booking-${crypto.randomUUID?.() || crypto.randomBytes(12).toString('hex')}`;
@@ -45,11 +45,12 @@ export default async function handler(request, response) {
         updatedAt: now.toISOString()
       });
       const errors = bookingValidationErrors(booking);
-      if (errors.length || requested.consent !== true || !getBookingTimes(booking.date, now, eventIndex).includes(booking.time)) return json(response, 422, { error: 'VALIDATION_ERROR', fields: errors });
       const { content, bookings } = await loadContext();
+      if (errors.length || requested.consent !== true || !getBookingTimes(booking.date, now, eventIndex, content.bookingSettings).includes(booking.time)) return json(response, 422, { error: 'VALIDATION_ERROR', fields: errors });
       if (bookingSlotIsFull(bookings, booking.date, booking.time, content.bookingSettings)) return json(response, 409, { error: 'SLOT_FULL' });
       const email = await sendBookingEmail(booking, 'received');
-      const nextBooking = { ...booking, notificationStatus: email.sent ? 'sent' : email.reason, notifiedAt: email.sent ? now.toISOString() : null };
+      const adminEmail = content.cafeSettings.adminNotificationsEnabled ? await sendAdminBookingEmail(booking, content.cafeSettings.adminNotificationEmail) : { sent: false, reason: 'ADMIN_NOTIFICATIONS_DISABLED' };
+      const nextBooking = { ...booking, notificationStatus: email.sent ? 'sent' : email.reason, adminNotificationStatus: adminEmail.sent ? 'sent' : adminEmail.reason, notifiedAt: email.sent ? now.toISOString() : null };
       await setBookings([nextBooking, ...bookings].slice(0, 500));
       return json(response, 201, { booking: publicBooking(nextBooking) });
     }
