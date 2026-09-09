@@ -33,10 +33,9 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
 .admin-section-bookings > section:nth-child(3), .admin-section-bookings > section:nth-child(10),
 .admin-section-menu > section:nth-child(4), .admin-section-menu > section:nth-child(11),
 .admin-section-events > section:nth-child(5), .admin-section-events > section:nth-child(12),
-.admin-section-cat-cards > section:nth-child(6), .admin-section-cat-cards > section:nth-child(15),
+.admin-section-cat-cards > section:nth-child(6), .admin-section-cat-cards > section:nth-child(14),
 .admin-section-cat-profiles > section:nth-child(7), .admin-section-visit > section:nth-child(8),
-.admin-section-needs > section:nth-child(9), .admin-section-seo > section:nth-child(13),
-.admin-section-stats > section:nth-child(14) { display: block; }
+.admin-section-needs > section:nth-child(9), .admin-section-seo > section:nth-child(13) { display: block; }
 @media (max-width: 639px) {
   nav > div { height: auto; min-height: 5rem; flex-wrap: wrap; padding-top: .75rem; padding-bottom: .75rem; gap: .75rem; }
   nav a { min-width: 0; }
