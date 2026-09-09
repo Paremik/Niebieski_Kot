@@ -49,7 +49,7 @@ export default function AdminPage() {
   const { language, tr } = useLanguage(), t = labels[language] || labels.pl;
   const feature = featureText[language] || featureText.pl;
   const [session, setSession] = useState({ loading: typeof window !== 'undefined', authenticated: false, configured: true });
-  const canEditContent = session.role !== 'staff';
+  const canEditContent = ['owner', 'manager'].includes(session.role);
   const [data, setData] = useState(() => normalizeAdminData(defaultData));
   const [bookings, setBookings] = useState([]);
   const [bookingDrafts, setBookingDrafts] = useState({});

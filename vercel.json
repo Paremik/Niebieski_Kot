@@ -1,11 +1,17 @@
 {
   "rewrites": [
-    { "source": "/((?!api/|assets/|images/|favicon.svg|robots.txt|sitemap.xml).*)", "destination": "/index.html" }
+    { "source": "/menu", "destination": "/menu/index.html" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/koty/luna", "destination": "/koty/luna/index.html" },
+    { "source": "/koty/mochi", "destination": "/koty/mochi/index.html" },
+    { "source": "/koty/pixel", "destination": "/koty/pixel/index.html" }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self' https://fonts.gstatic.com; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; upgrade-insecure-requests" },
+        { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }

@@ -3,7 +3,9 @@ export function warsawTime(now = new Date()) {
   const date = `${parts.year}-${parts.month}-${parts.day}`;
   return {date, time:`${parts.hour}:${parts.minute}`, day: new Date(`${date}T12:00:00Z`).getUTCDay()};
 }
-export function getBookingTimes(date, now = new Date(), eventIndex = null, settings = {}) {
+const legacyEventIds = ['yoga', 'games', 'workshops', 'adoption'];
+
+export function getBookingTimes(date, now = new Date(), eventId = null, settings = {}) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return [];
   const parsed = new Date(`${date}T12:00:00Z`);
   if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0,10) !== date) return [];
@@ -16,9 +18,10 @@ export function getBookingTimes(date, now = new Date(), eventIndex = null, setti
   if (day === 1 && !settings.openDates?.includes?.(date)) return [];
   let times = day === 0 || day === 6 ? ['10:00'] : [];
   times.push('11:00','12:30','14:00','15:30','17:00','18:30');
-  if (eventIndex === 0) times = day === 0 ? ['10:00'] : [];
-  if (eventIndex === 1) times = day === 5 ? ['18:00'] : [];
-  if (eventIndex === 2) times = day === 6 && parsed.getUTCDate() <= 14 ? ['12:00'] : [];
-  if (eventIndex === 3) times = day === 0 && parsed.getUTCDate() <= 7 ? ['12:00'] : [];
+  const scheduleId = typeof eventId === 'number' ? legacyEventIds[eventId] : eventId;
+  if (scheduleId === 'yoga') times = day === 0 ? ['10:00'] : [];
+  if (scheduleId === 'games') times = day === 5 ? ['18:00'] : [];
+  if (scheduleId === 'workshops') times = day === 6 && parsed.getUTCDate() <= 14 ? ['12:00'] : [];
+  if (scheduleId === 'adoption') times = day === 0 && parsed.getUTCDate() <= 7 ? ['12:00'] : [];
   return times.filter(time => date > current.date || time > current.time);
 }

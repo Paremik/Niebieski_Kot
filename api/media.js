@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { getMedia, setMedia } from './_lib/redis.js';
-import { isAuthenticated, sessionUser } from './_lib/auth.js';
+import { hasPermission, isAuthenticated } from './_lib/auth.js';
 import { bodyOf, json, sameOrigin } from './_lib/http.js';
 
 const types = { jpeg: 'image/jpeg', jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' };
@@ -24,7 +24,7 @@ export default async function handler(request, response) {
     if (request.method !== 'POST') return json(response, 405, { error: 'METHOD_NOT_ALLOWED' }, { Allow: 'GET, POST' });
     if (!sameOrigin(request)) return json(response, 403, { error: 'INVALID_ORIGIN' });
     if (!isAuthenticated(request)) return json(response, 401, { error: 'UNAUTHORIZED' });
-    if (sessionUser(request)?.role === 'staff') return json(response, 403, { error: 'FORBIDDEN' });
+    if (!hasPermission(request, 'content')) return json(response, 403, { error: 'FORBIDDEN' });
     if (Number(request.headers['content-length'] || 0) > 1_200_000) return json(response, 413, { error: 'IMAGE_TOO_LARGE' });
     const requested = bodyOf(request);
     const match = String(requested.dataUrl || '').match(/^data:image\/(jpeg|jpg|png|webp|gif);base64,([a-z0-9+/=]+)$/i);

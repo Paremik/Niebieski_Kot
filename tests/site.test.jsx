@@ -14,17 +14,18 @@ import SupportModal from '../SupportModal.jsx';
 import {catProfiles} from '../src/data/catProfiles.js';
 import {cats,rules,faqItems,events,menuSlides} from '../src/data/homeData.js';
 import {getBookingTimes,warsawTime} from '../src/lib/booking.js';
-import {normalizeAdminData,validAdminData} from '../src/data/adminData.js';
+import {normalizeAdminData,publicAdminData,validAdminData} from '../src/data/adminData.js';
 import {bookingSlotCount, bookingSlotIsFull, bookingValidationErrors, normalizeBookings} from '../src/data/bookings.js';
 import {SiteContentProvider} from '../src/content/SiteContentProvider.jsx';
 import {json} from '../api/_lib/http.js';
+import {normalizeRole,rolePermissions} from '../api/_lib/auth.js';
 
 const locales=['pl','ru','en'];
 const render = (node,locale,path='/') => renderToStaticMarkup(<LanguageProvider initialLanguage={locale}><SiteContentProvider initialData={normalizeAdminData(null)}><StaticRouter location={path}>{node}</StaticRouter></SiteContentProvider></LanguageProvider>);
 const neutral = new Set(['Luna','Mochi','Pixel','luna','mochi','pixel']);
 function auditData(value, path='') {
   if (typeof value === 'string') {
-    if (/^https?:|^\/images\//.test(value) || !/\p{L}/u.test(value) || neutral.has(value)) return;
+    if (path.endsWith('.id') || /^https?:|^\/images\//.test(value) || !/\p{L}/u.test(value) || neutral.has(value)) return;
     assert.ok(messages[value], 'Missing data translation: '+path+' '+value);
     for(const locale of locales) assert.ok(messages[value][locale], 'Missing '+locale+': '+value);
   } else if (Array.isArray(value)) value.forEach((item,i)=>auditData(item,path+'.'+i));
@@ -117,6 +118,24 @@ test('event booking retains event times and recurrence',()=>{
  assert.deepEqual(getBookingTimes('2026-09-12',now,2),['12:00']);
  assert.deepEqual(getBookingTimes('2026-09-19',now,2),[]);
  assert.deepEqual(getBookingTimes('2026-10-04',now,3),['12:00']);
+ assert.deepEqual(getBookingTimes('2026-10-03',now,'adoption'),[]);
+ assert.deepEqual(getBookingTimes('2026-10-04',now,'adoption'),['12:00']);
+ assert.deepEqual(getBookingTimes('2026-09-11',now,'games'),['18:00']);
+ assert.deepEqual(getBookingTimes('2026-09-13',now,'yoga'),['10:00']);
+});
+test('public content hides administrator notification settings',()=>{
+ const data=normalizeAdminData(null);
+ data.cafeSettings.adminNotificationEmail='owner@example.com';
+ const publicData=publicAdminData(data);
+ assert.equal(Object.hasOwn(publicData.cafeSettings,'adminNotificationEmail'),false);
+ assert.equal(Object.hasOwn(publicData.cafeSettings,'adminNotificationsEnabled'),false);
+ assert.equal(publicData.cafeSettings.phone,data.cafeSettings.phone);
+});
+test('unknown administrator roles receive only staff permissions',()=>{
+ assert.equal(normalizeRole('owner'),'owner');
+ assert.equal(normalizeRole('manager'),'manager');
+ assert.equal(normalizeRole('owern'),'staff');
+ assert.deepEqual(rolePermissions[normalizeRole('unexpected')],['bookings']);
 });
 test('corrupt admin data cannot crash the editor and numeric validation works',()=>{
  for(const input of [null,[],{}, {schedule:null, prices:'bad',events:[null],cats:42, availability:null}]) {

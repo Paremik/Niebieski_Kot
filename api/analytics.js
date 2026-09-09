@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { getAnalytics, incrementMetric, markAnalyticsSession } from './_lib/redis.js';
-import { isAuthenticated } from './_lib/auth.js';
+import { hasPermission, isAuthenticated } from './_lib/auth.js';
 import { bodyOf, json, sameOrigin } from './_lib/http.js';
 
 const clean = value => String(value || '').toLowerCase().replace(/[^a-z0-9/_:-]/g, '').slice(0, 80);
@@ -11,6 +11,7 @@ export default async function handler(request, response) {
   try {
     if (request.method === 'GET') {
       if (!isAuthenticated(request)) return json(response, 401, { error: 'UNAUTHORIZED' });
+      if (!hasPermission(request, 'bookings')) return json(response, 403, { error: 'FORBIDDEN' });
       const metrics = await getAnalytics();
       response.setHeader('Cache-Control', 'private, no-store');
       return json(response, 200, {

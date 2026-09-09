@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
-import { defaultData, normalizeAdminData } from '../src/data/adminData.js';
-import { bookingSlotIsFull, bookingStatuses, bookingValidationErrors, normalizeBooking, normalizeBookings } from '../src/data/bookings.js';
-import { getBookings, getContent, setBookings } from './_lib/redis.js';
-import { isAuthenticated } from './_lib/auth.js';
+import { defaultData, normalizeAdminData, textFor } from '../src/data/adminData.js';
+import { bookingStatuses, bookingValidationErrors, normalizeBooking, normalizeBookings } from '../src/data/bookings.js';
+import { bookingRateKey, consumeRateLimit, getBookings, getContent, reserveBooking, updateBookingFields } from './_lib/redis.js';
+import { clientFingerprint, hasPermission, isAuthenticated } from './_lib/auth.js';
 import { bodyOf, json, sameOrigin } from './_lib/http.js';
 import { sendAdminBookingEmail, sendBookingEmail } from './_lib/email.js';
 import { getBookingTimes } from '../src/lib/booking.js';
@@ -20,6 +20,7 @@ export default async function handler(request, response) {
   try {
     if (request.method === 'GET') {
       if (!isAuthenticated(request)) return json(response, 401, { error: 'UNAUTHORIZED' });
+      if (!hasPermission(request, 'bookings')) return json(response, 403, { error: 'FORBIDDEN' });
       const { content, bookings } = await loadContext();
       response.setHeader('Cache-Control', 'private, no-store');
       return json(response, 200, { bookings, settings: content.bookingSettings });
@@ -28,9 +29,13 @@ export default async function handler(request, response) {
     if (request.method === 'POST') {
       if (!sameOrigin(request)) return json(response, 403, { error: 'INVALID_ORIGIN' });
       if (Number(request.headers['content-length'] || 0) > 50000) return json(response, 413, { error: 'PAYLOAD_TOO_LARGE' });
+      if (!await consumeRateLimit(bookingRateKey(clientFingerprint(request)), 8, 600)) return json(response, 429, { error: 'RATE_LIMITED' }, { 'Retry-After': '600' });
       const requested = bodyOf(request);
-      const eventIndex = requested.eventIndex !== null && requested.eventIndex !== undefined && requested.eventIndex !== '' && Number.isInteger(Number(requested.eventIndex)) ? Number(requested.eventIndex) : null;
+      const eventId = typeof requested.eventId === 'string' ? requested.eventId.trim().slice(0, 120) : null;
       const now = new Date();
+      const { content } = await loadContext();
+      const selectedEvent = eventId ? content.events.find(event => event.enabled && event.id === eventId) : null;
+      if (eventId && !selectedEvent) return json(response, 422, { error: 'VALIDATION_ERROR', fields: ['event'] });
       const booking = normalizeBooking({
         id: bookingId(),
         date: requested.date,
@@ -39,25 +44,31 @@ export default async function handler(request, response) {
         name: requested.name,
         email: requested.email,
         notes: requested.notes,
-        eventTitle: requested.eventTitle,
+        eventTitle: selectedEvent ? textFor(selectedEvent.title, 'pl') : '',
         status: 'new',
+        notificationStatus: 'pending',
+        adminNotificationStatus: content.cafeSettings.adminNotificationsEnabled ? 'pending' : 'ADMIN_NOTIFICATIONS_DISABLED',
         createdAt: now.toISOString(),
         updatedAt: now.toISOString()
       });
       const errors = bookingValidationErrors(booking);
-      const { content, bookings } = await loadContext();
-      if (errors.length || requested.consent !== true || !getBookingTimes(booking.date, now, eventIndex, content.bookingSettings).includes(booking.time)) return json(response, 422, { error: 'VALIDATION_ERROR', fields: errors });
-      if (bookingSlotIsFull(bookings, booking.date, booking.time, content.bookingSettings)) return json(response, 409, { error: 'SLOT_FULL' });
-      const email = await sendBookingEmail(booking, 'received');
-      const adminEmail = content.cafeSettings.adminNotificationsEnabled ? await sendAdminBookingEmail(booking, content.cafeSettings.adminNotificationEmail) : { sent: false, reason: 'ADMIN_NOTIFICATIONS_DISABLED' };
-      const nextBooking = { ...booking, notificationStatus: email.sent ? 'sent' : email.reason, adminNotificationStatus: adminEmail.sent ? 'sent' : adminEmail.reason, notifiedAt: email.sent ? now.toISOString() : null };
-      await setBookings([nextBooking, ...bookings].slice(0, 500));
+      if (errors.length || requested.consent !== true || !getBookingTimes(booking.date, now, eventId, content.bookingSettings).includes(booking.time)) return json(response, 422, { error: 'VALIDATION_ERROR', fields: errors });
+      if (!await reserveBooking(booking, content.bookingSettings.maxTables)) return json(response, 409, { error: 'SLOT_FULL' });
+      const [visitorResult, adminResult] = await Promise.allSettled([
+        sendBookingEmail(booking, 'received'),
+        content.cafeSettings.adminNotificationsEnabled ? sendAdminBookingEmail(booking, content.cafeSettings.adminNotificationEmail) : Promise.resolve({ sent: false, reason: 'ADMIN_NOTIFICATIONS_DISABLED' })
+      ]);
+      const email = visitorResult.status === 'fulfilled' ? visitorResult.value : { sent: false, reason: 'EMAIL_FAILED' };
+      const adminEmail = adminResult.status === 'fulfilled' ? adminResult.value : { sent: false, reason: 'EMAIL_FAILED' };
+      const notificationPatch = { notificationStatus: email.sent ? 'sent' : email.reason, adminNotificationStatus: adminEmail.sent ? 'sent' : adminEmail.reason, notifiedAt: email.sent ? now.toISOString() : null };
+      const nextBooking = normalizeBooking(await updateBookingFields(booking.id, notificationPatch) || { ...booking, ...notificationPatch });
       return json(response, 201, { booking: publicBooking(nextBooking) });
     }
 
     if (request.method === 'PUT') {
       if (!sameOrigin(request)) return json(response, 403, { error: 'INVALID_ORIGIN' });
       if (!isAuthenticated(request)) return json(response, 401, { error: 'UNAUTHORIZED' });
+      if (!hasPermission(request, 'bookings')) return json(response, 403, { error: 'FORBIDDEN' });
       if (Number(request.headers['content-length'] || 0) > 50000) return json(response, 413, { error: 'PAYLOAD_TOO_LARGE' });
       const requested = bodyOf(request);
       const id = String(requested.id || '');
@@ -65,19 +76,21 @@ export default async function handler(request, response) {
       const index = bookings.findIndex(row => row.id === id);
       if (index < 0) return json(response, 404, { error: 'BOOKING_NOT_FOUND' });
       const updatedAt = new Date().toISOString();
-      let nextBooking = normalizeBooking({
+      const draft = normalizeBooking({
         ...bookings[index],
         status: bookingStatuses.includes(requested.status) ? requested.status : bookings[index].status,
         adminNote: requested.adminNote,
         updatedAt
       }, index);
+      const savedBooking = await updateBookingFields(id, { status: draft.status, adminNote: draft.adminNote, updatedAt });
+      if (!savedBooking) return json(response, 404, { error: 'BOOKING_NOT_FOUND' });
+      let nextBooking = normalizeBooking(savedBooking);
       let email = { sent: false, reason: 'NOT_REQUESTED' };
       if (requested.notify === true) {
         email = await sendBookingEmail(nextBooking, nextBooking.status);
-        nextBooking = { ...nextBooking, notificationStatus: email.sent ? 'sent' : email.reason, notifiedAt: email.sent ? updatedAt : nextBooking.notifiedAt };
+        const notificationPatch = { notificationStatus: email.sent ? 'sent' : email.reason, notifiedAt: email.sent ? updatedAt : nextBooking.notifiedAt };
+        nextBooking = normalizeBooking(await updateBookingFields(id, notificationPatch) || { ...nextBooking, ...notificationPatch });
       }
-      const next = bookings.map((row, rowIndex) => rowIndex === index ? nextBooking : row);
-      await setBookings(next);
       return json(response, 200, { booking: nextBooking, email });
     }
 

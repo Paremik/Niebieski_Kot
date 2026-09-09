@@ -11,8 +11,15 @@ const safeEqual = (a, b) => {
   return first.length === second.length && crypto.timingSafeEqual(first, second);
 };
 
+export const rolePermissions = {
+  owner: ['content', 'bookings', 'settings', 'users'],
+  manager: ['content', 'bookings', 'settings'],
+  staff: ['bookings']
+};
+export const normalizeRole = value => Object.hasOwn(rolePermissions, value) ? value : 'staff';
+
 function configuredUsers() {
-  try { const users = JSON.parse(process.env.ADMIN_USERS_JSON || '[]'); return Array.isArray(users) ? users.filter(user => user?.username && user?.password).slice(0, 20) : []; } catch { return []; }
+  try { const users = JSON.parse(process.env.ADMIN_USERS_JSON || '[]'); return Array.isArray(users) ? users.filter(user => user?.username && user?.password).slice(0, 20).map(user => ({ ...user, role: normalizeRole(user.role) })) : []; } catch { return []; }
 }
 export function adminUsers() {
   const users = configuredUsers();
@@ -24,7 +31,7 @@ export const findAdmin = (username, password) => adminUsers().find(user => user.
 export const passwordMatches = (value, username = 'owner') => Boolean(findAdmin(username, value));
 
 export function createSessionCookie(user = { username: 'owner', role: 'owner' }) {
-  const payload = encode(JSON.stringify({ username: user.username, role: user.role || 'staff', exp: Math.floor(Date.now() / 1000) + ttl }));
+  const payload = encode(JSON.stringify({ username: user.username, role: normalizeRole(user.role), exp: Math.floor(Date.now() / 1000) + ttl }));
   return `${cookieName}=${payload}.${sign(payload)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${ttl}`;
 }
 
@@ -45,13 +52,9 @@ export function sessionUser(request) {
   if (!raw) return null;
   const [payload, signature] = raw.split('.');
   if (!payload || !signature || !safeEqual(signature, sign(payload))) return null;
-  try { const user = JSON.parse(Buffer.from(payload, 'base64url').toString()); return user.exp > Date.now() / 1000 ? user : null; } catch { return null; }
+  try { const user = JSON.parse(Buffer.from(payload, 'base64url').toString()); return user.exp > Date.now() / 1000 ? { ...user, role: normalizeRole(user.role) } : null; } catch { return null; }
 }
 
-export const rolePermissions = {
-  owner: ['content', 'bookings', 'settings', 'users'],
-  manager: ['content', 'bookings', 'settings'],
-  staff: ['bookings']
-};
+export const hasPermission = (request, permission) => rolePermissions[sessionUser(request)?.role]?.includes(permission) === true;
 
 export const clientFingerprint = request => crypto.createHash('sha256').update(String(request.headers['x-forwarded-for'] || request.socket?.remoteAddress || 'unknown').split(',')[0]).digest('hex').slice(0, 24);

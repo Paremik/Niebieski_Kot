@@ -44,7 +44,7 @@ export default function BookingModal({
   };
   const submit = async event => {
     event.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.consent || !getBookingTimes(form.date, new Date(), bookingEvent?.index, bookingSettings).includes(form.time)) {setError('invalid'); return;}
+    if (!form.name.trim() || !form.email.trim() || !form.consent || !getBookingTimes(form.date, new Date(), bookingEvent?.id, bookingSettings).includes(form.time)) {setError('invalid'); return;}
     setSubmitting(true);
     setError('');
     try {
@@ -52,7 +52,7 @@ export default function BookingModal({
         method: 'POST',
         credentials: 'same-origin',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, eventIndex: bookingEvent?.index ?? null, eventTitle: bookingEvent?.title || '' })
+        body: JSON.stringify({ ...form, eventId: bookingEvent?.id || null })
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -66,7 +66,7 @@ export default function BookingModal({
       setSubmitting(false);
     }
   };
-  const times = getBookingTimes(form.date, new Date(), bookingEvent?.index, bookingSettings);
+  const times = getBookingTimes(form.date, new Date(), bookingEvent?.id, bookingSettings);
   return <div className="fixed inset-0 z-[70] grid place-items-center overflow-y-auto bg-slate-950/65 p-4 backdrop-blur-sm" onMouseDown={event => event.target === event.currentTarget && close()}>
     <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="booking-title" className="relative my-auto w-full max-w-2xl overflow-hidden rounded-[2.25rem] bg-[#f7f8f4] shadow-2xl">
       <div className="absolute left-5 top-4"><LanguageSelect /></div>

@@ -146,6 +146,12 @@ export function normalizeAdminData(input) {
   return result;
 }
 
+export function publicAdminData(input) {
+  const data = normalizeAdminData(input);
+  const { adminNotificationEmail, adminNotificationsEnabled, ...publicCafeSettings } = data.cafeSettings;
+  return { ...data, cafeSettings: publicCafeSettings };
+}
+
 export function validationErrors(input) {
   const data=normalizeAdminData(input), errors=[];
   const required=(value,label)=>contentLocales.forEach(locale=>{if(!trim(value?.[locale]))errors.push(`${label} (${locale.toUpperCase()})`);});
