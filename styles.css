@@ -10,6 +10,7 @@
 @layer components {
   .field-input, .admin-input { @apply mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-200; }
   .admin-label { @apply text-sm font-extrabold text-slate-700; }
+  .admin-action { @apply inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-extrabold text-slate-700 transition hover:border-sky-300 hover:text-sky-600 disabled:opacity-40; }
 }
 
 

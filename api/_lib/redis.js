@@ -1,4 +1,5 @@
 const key = 'niebieski-kot:content:v1';
+const bookingsKey = 'niebieski-kot:bookings:v1';
 
 function config() {
   const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
@@ -27,4 +28,10 @@ export async function getContent() {
 }
 
 export const setContent = value => redis(['SET', key, JSON.stringify(value)]);
+export async function getBookings() {
+  const value = await redis(['GET', bookingsKey]);
+  if (!value) return [];
+  try { return JSON.parse(value); } catch { return []; }
+}
+export const setBookings = value => redis(['SET', bookingsKey, JSON.stringify(value)]);
 export const rateKey = value => `niebieski-kot:login:${value}`;

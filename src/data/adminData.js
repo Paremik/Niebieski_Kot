@@ -1,6 +1,7 @@
 export const contentLocales = ['pl', 'ru', 'en'];
 export const localized = (pl, ru = pl, en = pl) => ({ pl, ru, en });
 export const textFor = (value, language = 'pl') => typeof value === 'string' ? value : value?.[language] ?? value?.pl ?? '';
+const defaultBookingSettings = { maxTables: 6 };
 
 const menu = [
   ['espresso','coffee','Espresso','Эспрессо','Espresso','10 zł'], ['americano','coffee','Americano','Американо','Americano','12 zł'], ['cappuccino','coffee','Cappuccino','Капучино','Cappuccino','15 zł'], ['flat-white','coffee','Flat white','Флэт уайт','Flat white','17 zł'], ['cat-latte','coffee','Kocie latte','Кошачий латте','Cat latte','18 zł'],
@@ -22,6 +23,7 @@ export const defaultData = {
     { id:'adoption', title:localized('Dzień adopcji','День усыновления','Adoption day'), date:localized('Pierwsza niedziela miesiąca','Первое воскресенье месяца','First Sunday of the month'), places:'20', status:'planned', enabled:true }
   ],
   availability: { status:'calm', note:localized('Dużo wolnych miejsc · aktualizacja ręczna','Много свободных мест · обновлено вручную','Plenty of free tables · updated manually') },
+  bookingSettings: defaultBookingSettings,
   cats: [
     { id:'luna', slug:'luna', name:'Luna', status:'resident', note:localized('4 lata · spokojna obserwatorka','4 года · спокойная наблюдательница','4 years · a calm observer'), intro:localized('Najchętniej siedzi przy oknie i sama wybiera moment na głaskanie.','Любит сидеть у окна и сама выбирает момент для ласки.','She loves sitting by the window and chooses when it is time for affection.'), enabled:true },
     { id:'mochi', slug:'mochi', name:'Mochi', status:'resident', note:localized('6 lat · mistrz drzemek','6 лет · мастер сна','6 years · master napper'), intro:localized('Kocha miękkie koce, spokojne rozmowy i ludzi z książką na kolanach.','Любит мягкие пледы, спокойные разговоры и людей с книгой на коленях.','He loves soft blankets, quiet conversation and people reading a book.'), enabled:true },
@@ -44,6 +46,8 @@ export function normalizeAdminData(input) {
   result.events = (Array.isArray(source.events) ? source.events : defaultData.events).slice(0,30).map((row,i)=>({id:stableId(row?.id,`event-${i}`),title:localText(row?.title,defaultData.events[i]?.title),date:localText(row?.date,defaultData.events[i]?.date),places:trim(row?.places??'0',4),status:['open','planned','closed'].includes(row?.status)?row.status:'planned',enabled:row?.enabled!==false}));
   const availability=source.availability??defaultData.availability;
   result.availability={status:['calm','busy','almost-full','full'].includes(availability?.status)?availability.status:'calm',note:localText(availability?.note,defaultData.availability.note)};
+  const maxTables=Number(source.bookingSettings?.maxTables);
+  result.bookingSettings={maxTables:Number.isInteger(maxTables)&&maxTables>=1&&maxTables<=40?maxTables:defaultBookingSettings.maxTables};
   result.cats=(Array.isArray(source.cats)?source.cats:defaultData.cats).slice(0,20).map((row,i)=>({id:stableId(row?.id,`cat-${i}`),slug:stableId(row?.slug,defaultData.cats[i]?.slug??`cat-${i}`),name:trim(row?.name??defaultData.cats[i]?.name,80),status:['resident','adoption','reserved'].includes(row?.status)?row.status:'resident',note:localText(row?.note,defaultData.cats[i]?.note),intro:localText(row?.intro,defaultData.cats[i]?.intro),enabled:row?.enabled!==false}));
   result.revision=Number.isSafeInteger(source.revision)&&source.revision>=0?source.revision:0;
   result.updatedAt=typeof source.updatedAt==='string'?source.updatedAt:null;
@@ -57,6 +61,7 @@ export function validationErrors(input) {
   data.prices.forEach((row,i)=>{required(row.name,`Menu ${i+1}`);if(!/^\d+(?:[.,]\d{1,2})?\s*(?:zł|PLN)?$/i.test(row.price))errors.push(`Cena ${i+1}`);});
   data.events.forEach((row,i)=>{required(row.title,`Wydarzenie ${i+1}`);required(row.date,`Data ${i+1}`);if(!/^\d{1,4}$/.test(row.places)||Number(row.places)>1000)errors.push(`Miejsca ${i+1}`);});
   required(data.availability.note,'Dostępność');
+  if(!Number.isInteger(data.bookingSettings.maxTables)||data.bookingSettings.maxTables<1||data.bookingSettings.maxTables>40)errors.push('Limit stolików');
   data.cats.forEach((row,i)=>{if(!row.name||!row.slug)errors.push(`Kot ${i+1}`);required(row.note,`Opis kota ${i+1}`);required(row.intro,`Historia kota ${i+1}`);});
   data.cats.forEach((row,i)=>{if(!['luna','mochi','pixel'].includes(row.slug))errors.push(`Adres profilu kota ${i+1}`);});
   if(new Set(data.cats.map(row=>row.slug)).size!==data.cats.length)errors.push('Powtarzające się adresy kotów');

@@ -15,6 +15,7 @@ import {catProfiles} from '../src/data/catProfiles.js';
 import {cats,rules,faqItems,events,menuSlides} from '../src/data/homeData.js';
 import {getBookingTimes,warsawTime} from '../src/lib/booking.js';
 import {normalizeAdminData,validAdminData} from '../src/data/adminData.js';
+import {bookingSlotCount, bookingSlotIsFull, bookingValidationErrors, normalizeBookings} from '../src/data/bookings.js';
 import {SiteContentProvider} from '../src/content/SiteContentProvider.jsx';
 import {json} from '../api/_lib/http.js';
 
@@ -126,7 +127,21 @@ test('corrupt admin data cannot crash the editor and numeric validation works',(
  assert.equal(validAdminData(data),true);
  data.prices[0].price='-1 zł'; assert.equal(validAdminData(data),false);
  data.prices[0].price='10.50 zł'; data.events[0].places='-1'; assert.equal(validAdminData(data),false);
- data.events[0].places='12'; assert.equal(validAdminData(data),true);
+  data.events[0].places='12'; assert.equal(validAdminData(data),true);
+});
+test('booking normalization and table limits count only active reservations',()=>{
+ const rows=normalizeBookings([
+  {id:'one',date:'2026-09-08',time:'11:00',guests:'2',name:'Anna',email:'ANNA@EXAMPLE.COM',status:'new'},
+  {id:'two',date:'2026-09-08',time:'11:00',guests:4,name:'Piotr',email:'piotr@example.com',status:'confirmed'},
+  {id:'old',date:'2026-09-08',time:'11:00',guests:2,name:'Ola',email:'ola@example.com',status:'cancelled'},
+  {id:'bad',date:'bad',time:'25:00',name:'',email:'nope'}
+ ]);
+ assert.equal(rows.length,3);
+ assert.equal(rows[0].email,'anna@example.com');
+ assert.equal(bookingSlotCount(rows,'2026-09-08','11:00'),2);
+ assert.equal(bookingSlotIsFull(rows,'2026-09-08','11:00',{maxTables:2}),true);
+ assert.deepEqual(bookingValidationErrors({date:'2026-09-08',time:'11:00',guests:2,name:'Anna',email:'anna@example.com'}),[]);
+ assert.equal(bookingValidationErrors({date:'',time:'11:00',guests:2,name:'Anna',email:'bad'}).includes('email'),true);
 });
 test('cat-of-day and visit follow the cat cards in the actual DOM order',()=>{
  const html=render(<AppRoutes/>,'pl');
